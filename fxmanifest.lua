@@ -1,16 +1,14 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QB-Houses'
-version '2.1.0'
-
 ui_page 'html/index.html'
 
 shared_scripts {
     'config.lua',
     '@qb-core/shared/locale.lua',
     'locales/en.lua',
-    'locales/*.lua'
+    'locales/*.lua',
+    '@ox_lib/init.lua'
 }
 
 client_scripts {
@@ -18,7 +16,7 @@ client_scripts {
     'client/decorate.lua',
     '@PolyZone/client.lua',
     '@PolyZone/BoxZone.lua',
-    '@PolyZone/CircleZone.lua',
+    '@PolyZone/CircleZone.lua'
 }
 
 server_scripts {
