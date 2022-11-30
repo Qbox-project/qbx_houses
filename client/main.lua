@@ -22,15 +22,12 @@ local CurrentHouse = nil
 local fetchingHouseKeys = false
 
 -- zone check
-local stashTargetBoxID = 'stashTarget'
 local stashTargetBox = nil
 local isInsideStashTarget = false
 
-local outfitsTargetBoxID = 'outfitsTarget'
 local outfitsTargetBox = nil
 local isInsideOutfitsTarget = false
 
-local charactersTargetBoxID = 'charactersTarget'
 local charactersTargetBox = nil
 local isInsiteCharactersTarget = false
 

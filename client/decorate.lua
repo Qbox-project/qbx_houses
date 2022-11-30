@@ -439,7 +439,7 @@ RegisterNUICallback("spawnobject", function(data, cb)
     local xVect = 2.5 * math.sin( degToRad( rotation.z ) ) * -1.0
     local yVect = 2.5 * math.cos( degToRad( rotation.z ) )
 
-    SelectedObj = CreateObject(modelHash, curPos.x + xVect, curPos.y + yVect, curPos.z, false, false, false)
+    SelectedObj = CreateObject(data.object, curPos.x + xVect, curPos.y + yVect, curPos.z, false, false, false)
 
     local pos = GetEntityCoords(SelectedObj, true)
     local rot = GetEntityRotation(SelectedObj)
@@ -463,19 +463,6 @@ RegisterNUICallback("chooseobject", function(data, cb)
 
     lib.requestModel(data.object)
 
-    local count = 0
-
-    while not HasModelLoaded(modelHash) do
-        -- Counter to prevent infinite loading when object does not exist
-        if count > 10 then
-            break
-        end
-
-        count = count + 1
-
-        Wait(1000)
-    end
-
     -- Make buttons selectable again
     SendNUIMessage({
         type = "objectLoaded"
@@ -485,7 +472,7 @@ RegisterNUICallback("chooseobject", function(data, cb)
     local xVect = 2.5 * math.sin(degToRad(rotation.z)) * -1.0
     local yVect = 2.5 * math.cos(degToRad(rotation.z))
 
-    previewObj = CreateObject(modelHash, curPos.x + xVect, curPos.y + yVect, curPos.z, false, false, false)
+    previewObj = CreateObject(data.object, curPos.x + xVect, curPos.y + yVect, curPos.z, false, false, false)
 
     PlaceObjectOnGroundProperly(previewObj)
 
