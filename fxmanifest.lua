@@ -13,10 +13,7 @@ shared_scripts {
 
 client_scripts {
     'client/main.lua',
-    'client/decorate.lua',
-    '@PolyZone/client.lua',
-    '@PolyZone/BoxZone.lua',
-    '@PolyZone/CircleZone.lua'
+    'client/decorate.lua'
 }
 
 server_scripts {
@@ -30,13 +27,6 @@ files {
     'html/style.css',
     'html/script.js',
     'html/img/dynasty8-logo.png'
-}
-
-dependencies {
-    'qb-core',
-    'qb-interior',
-    'qb-clothing',
-    'qb-weathersync'
 }
 
 lua54 'yes'

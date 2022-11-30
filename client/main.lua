@@ -130,21 +130,23 @@ local function RegisterStashTarget()
         return
     end
 
-    stashTargetBox = BoxZone:Create(vec3(stashLocation.x, stashLocation.y, stashLocation.z), 1.5, 1.5, {
-        name = stashTargetBoxID,
-        heading = 0.0,
-        minZ = stashLocation.z - 1.0,
-        maxZ = stashLocation.z + 1.0
-    })
-    stashTargetBox:onPlayerInOut(function(isPointInside)
-        if isPointInside and not entering and isOwned then
-            lib.showTextUI(Lang:t("target.open_stash"))
-        else
+    stashTargetBox = lib.zones.box({
+        coords = stashLocation,
+        size = vec3(1.5, 1.5, 1.5),
+        rotation = 0.0,
+        onEnter = function(_)
+            isInsideStashTarget = true
+
+            if not entering and isOwned then
+                lib.showTextUI(Lang:t("target.open_stash"))
+            end
+        end,
+        onExit = function(_)
+            isInsideStashTarget = false
+
             lib.hideTextUI()
         end
-
-        isInsideStashTarget = isPointInside
-    end)
+    })
 end
 
 local function RegisterOutfitsTarget()
@@ -152,22 +154,23 @@ local function RegisterOutfitsTarget()
         return
     end
 
-    outfitsTargetBox = BoxZone:Create(vec3(outfitLocation.x, outfitLocation.y, outfitLocation.z), 1.5, 1.5, {
-        name = outfitsTargetBoxID,
-        heading = 0.0,
-        minZ = outfitLocation.z - 1.0,
-        maxZ = outfitLocation.z + 1.0
-    })
+    outfitsTargetBox = lib.zones.box({
+        coords = outfitLocation,
+        size = vec3(1.5, 1.5, 1.5),
+        rotation = 0.0,
+        onEnter = function(_)
+            isInsideOutfitsTarget = true
 
-    outfitsTargetBox:onPlayerInOut(function(isPointInside)
-        if isPointInside and not entering and isOwned then
-            lib.showTextUI(Lang:t("target.outfits"))
-        else
+            if not entering and isOwned then
+                lib.showTextUI(Lang:t("target.outfits"))
+            end
+        end,
+        onExit = function(_)
+            isInsideOutfitsTarget = false
+
             lib.hideTextUI()
         end
-
-        isInsideOutfitsTarget = isPointInside
-    end)
+    })
 end
 
 local function RegisterCharactersTarget()
@@ -175,21 +178,23 @@ local function RegisterCharactersTarget()
         return
     end
 
-    charactersTargetBox = BoxZone:Create(vec3(logoutLocation.x, logoutLocation.y, logoutLocation.z), 1.5, 1.5, {
-        name = charactersTargetBoxID,
-        heading = 0.0,
-        minZ = logoutLocation.z - 1.0,
-        maxZ = logoutLocation.z + 1.0
-    })
-    charactersTargetBox:onPlayerInOut(function(isPointInside)
-        if isPointInside and not entering and isOwned then
-            lib.showTextUI(Lang:t("target.change_character"))
-        else
+    charactersTargetBox = lib.zones.box({
+        coords = logoutLocation,
+        size = vec3(1.5, 1.5, 1.5),
+        rotation = 0.0,
+        onEnter = function(_)
+            isInsiteCharactersTarget = true
+
+            if not entering and isOwned then
+                lib.showTextUI(Lang:t("target.change_character"))
+            end
+        end,
+        onExit = function(_)
+            isInsiteCharactersTarget = false
+
             lib.hideTextUI()
         end
-
-        isInsiteCharactersTarget = isPointInside
-    end)
+    })
 end
 
 local function RegisterHouseExitZone(id)
@@ -210,21 +215,22 @@ local function RegisterHouseExitZone(id)
 
     local house = Houses[id]
     local coords = vec3(house.coords['enter'].x + POIOffsets.exit.x, house.coords['enter'].y + POIOffsets.exit.y, house.coords['enter'].z  - Config.MinZOffset + POIOffsets.exit.z + 1.0)
-    local zone = BoxZone:Create(coords, 2, 1, {
-        name = boxName,
-        heading = 0.0,
-        minZ = coords.z - 2.0,
-        maxZ = coords.z + 1.0,
-    })
-    zone:onPlayerInOut(function(isPointInside)
-        if isPointInside then
+    local zone = lib.zones.box({
+        coords = coords,
+        size = vec3(2, 2, 2),
+        rotation = 0.0,
+        onEnter = function(_)
             showExitHeaderMenu()
-        else
+        end,
+        onExit = function(_)
             lib.hideContext()
         end
-    end)
+    })
 
-    Targets[boxName] = {created = true, zone = zone}
+    Targets[boxName] = {
+        created = true,
+        zone = zone
+    }
 end
 
 local function RegisterHouseEntranceZone(id, house)
@@ -236,21 +242,22 @@ local function RegisterHouseEntranceZone(id, house)
         return
     end
 
-    local zone = BoxZone:Create(coords, 2, 1, {
-        name = boxName,
-        heading = house.coords['enter'].h,
-        minZ = house.coords['enter'].z - 1.0,
-        maxZ = house.coords['enter'].z + 1.0
-    })
-    zone:onPlayerInOut(function(isPointInside)
-        if isPointInside then
+    local zone = lib.zones.box({
+        coords = coords,
+        size = vec3(2, 2, 2),
+        rotation = house.coords['enter'].h,
+        onEnter = function(_)
             showEntranceHeaderMenu()
-        else
+        end,
+        onExit = function(_)
             lib.hideContext()
         end
-    end)
+    })
 
-    Targets[boxName] = {created = true, zone = zone}
+    Targets[boxName] = {
+        created = true,
+        zone = zone
+    }
 end
 
 local function DeleteBoxTarget(box)
