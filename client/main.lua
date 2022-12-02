@@ -329,9 +329,9 @@ local function GetClosestPlayer()
                 closestDistance = distance
             end
         end
-	end
+    end
 
-	return closestPlayer, closestDistance
+    return closestPlayer, closestDistance
 end
 
 local function DoRamAnimation(bool)
@@ -554,30 +554,30 @@ local function setHouseLocations()
 end
 
 local function UnloadDecorations()
-	if ObjectList then
-		for _, v in pairs(ObjectList) do
-			if DoesEntityExist(v.object) then
-				DeleteObject(v.object)
-			end
-		end
-	end
+    if ObjectList then
+        for _, v in pairs(ObjectList) do
+            if DoesEntityExist(v.object) then
+                DeleteObject(v.object)
+            end
+        end
+    end
 end
 
 local function LoadDecorations(house)
-	if not Houses[house].decorations or not next(Houses[house].decorations) then
-		QBCore.Functions.TriggerCallback('qb-houses:server:getHouseDecorations', function(result)
-			Houses[house].decorations = result
+    if not Houses[house].decorations or not next(Houses[house].decorations) then
+        QBCore.Functions.TriggerCallback('qb-houses:server:getHouseDecorations', function(result)
+            Houses[house].decorations = result
 
-			if Houses[house].decorations then
-				ObjectList = {}
+            if Houses[house].decorations then
+                ObjectList = {}
 
-				for k, _ in pairs(Houses[house].decorations) do
-					if Houses[house].decorations[k] then
-						if Houses[house].decorations[k].object then
-							if DoesEntityExist(Houses[house].decorations[k].object) then
-								DeleteObject(Houses[house].decorations[k].object)
-							end
-						end
+                for k, _ in pairs(Houses[house].decorations) do
+                    if Houses[house].decorations[k] then
+                        if Houses[house].decorations[k].object then
+                            if DoesEntityExist(Houses[house].decorations[k].object) then
+                                DeleteObject(Houses[house].decorations[k].object)
+                            end
+                        end
 
                         local modelHash = joaat(Houses[house].decorations[k].hashname)
 
@@ -586,43 +586,43 @@ local function LoadDecorations(house)
                         local decorateObject = CreateObject(modelHash, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z, false, false, false)
 
                         FreezeEntityPosition(decorateObject, true)
-						SetEntityCoordsNoOffset(decorateObject, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z)
-						SetEntityRotation(decorateObject, Houses[house].decorations[k].rotx, Houses[house].decorations[k].roty, Houses[house].decorations[k].rotz)
+                        SetEntityCoordsNoOffset(decorateObject, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z)
+                        SetEntityRotation(decorateObject, Houses[house].decorations[k].rotx, Houses[house].decorations[k].roty, Houses[house].decorations[k].rotz)
 
                         ObjectList[Houses[house].decorations[k].objectId] = {hashname = Houses[house].decorations[k].hashname, x = Houses[house].decorations[k].x, y = Houses[house].decorations[k].y, z = Houses[house].decorations[k].z, rotx = Houses[house].decorations[k].rotx, roty = Houses[house].decorations[k].roty, rotz = Houses[house].decorations[k].rotz, object = decorateObject, objectId = Houses[house].decorations[k].objectId}
-					end
-				end
-			end
-		end, house)
-	elseif Houses[house].decorations then
-		ObjectList = {}
+                    end
+                end
+            end
+        end, house)
+    elseif Houses[house].decorations then
+        ObjectList = {}
 
-		for k, _ in pairs(Houses[house].decorations) do
-			if Houses[house].decorations[k] then
-				if Houses[house].decorations[k].object then
-					if DoesEntityExist(Houses[house].decorations[k].object) then
-						DeleteObject(Houses[house].decorations[k].object)
-					end
-				end
+        for k, _ in pairs(Houses[house].decorations) do
+            if Houses[house].decorations[k] then
+                if Houses[house].decorations[k].object then
+                    if DoesEntityExist(Houses[house].decorations[k].object) then
+                        DeleteObject(Houses[house].decorations[k].object)
+                    end
+                end
 
-				local modelHash = joaat(Houses[house].decorations[k].hashname)
+                local modelHash = joaat(Houses[house].decorations[k].hashname)
 
-				lib.requestModel(modelHash)
+                lib.requestModel(modelHash)
 
-				local decorateObject = CreateObject(modelHash, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z, false, false, false)
+                local decorateObject = CreateObject(modelHash, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z, false, false, false)
 
                 PlaceObjectOnGroundProperly(decorateObject)
-				FreezeEntityPosition(decorateObject, true)
-				SetEntityCoordsNoOffset(decorateObject, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z)
+                FreezeEntityPosition(decorateObject, true)
+                SetEntityCoordsNoOffset(decorateObject, Houses[house].decorations[k].x, Houses[house].decorations[k].y, Houses[house].decorations[k].z)
 
                 Houses[house].decorations[k].object = decorateObject
 
                 SetEntityRotation(decorateObject, Houses[house].decorations[k].rotx, Houses[house].decorations[k].roty, Houses[house].decorations[k].rotz)
 
                 ObjectList[Houses[house].decorations[k].objectId] = {hashname = Houses[house].decorations[k].hashname, x = Houses[house].decorations[k].x, y = Houses[house].decorations[k].y, z = Houses[house].decorations[k].z, rotx = Houses[house].decorations[k].rotx, roty = Houses[house].decorations[k].roty, rotz = Houses[house].decorations[k].rotz, object = decorateObject, objectId = Houses[house].decorations[k].objectId}
-			end
-		end
-	end
+            end
+        end
+    end
 end
 
 local function CheckDistance(target, distance)
@@ -1055,11 +1055,11 @@ exports('isNearHouses', isNearHouses)
 
 -- Events
 RegisterNetEvent('qb-houses:server:sethousedecorations', function(house, decorations)
-	Houses[house].decorations = decorations
+    Houses[house].decorations = decorations
 
-	if IsInside and ClosestHouse == house then
-		LoadDecorations(house)
-	end
+    if IsInside and ClosestHouse == house then
+        LoadDecorations(house)
+    end
 end)
 
 RegisterNetEvent('qb-houses:client:sellHouse', function()
@@ -1133,7 +1133,7 @@ end)
 RegisterNetEvent('qb-houses:client:createHouses', function(price, tier)
     local pos = GetEntityCoords(cache.ped)
     local heading = GetEntityHeading(cache.ped)
-	local s1, _ = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
+    local s1, _ = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
     local street = GetStreetNameFromHashKey(s1)
     local coords = {
         enter = { x = pos.x, y = pos.y, z = pos.z, h = heading},
@@ -1264,18 +1264,18 @@ end)
 
 RegisterNetEvent('qb-houses:client:enterOwnedHouse', function(house)
     QBCore.Functions.GetPlayerData(function(PlayerData)
-		if PlayerData.metadata.injail == 0 then
-			enterOwnedHouse(house)
-		end
-	end)
+        if PlayerData.metadata.injail == 0 then
+            enterOwnedHouse(house)
+        end
+    end)
 end)
 
 RegisterNetEvent('qb-houses:client:LastLocationHouse', function(houseId)
     QBCore.Functions.GetPlayerData(function(PlayerData)
-		if PlayerData.metadata.injail == 0 then
-			enterOwnedHouse(houseId)
-		end
-	end)
+        if PlayerData.metadata.injail == 0 then
+            enterOwnedHouse(houseId)
+        end
+    end)
 end)
 
 RegisterNetEvent('qb-houses:client:setupHouseBlips', function() -- Setup owned on load
