@@ -37,7 +37,6 @@ files {
 dependencies {
     'qbx-core',
     'qbx-interior',
-    'qbx-clothing',
     'qbx-weathersync'
 }
 
