@@ -330,9 +330,9 @@ end
 
 local function openHouseAnim()
     loadAnimDict("anim@heists@keycard@")
-    TaskPlayAnim( PlayerPedId(), "anim@heists@keycard@", "exit", 5.0, 1.0, -1, 16, 0, 0, 0, 0 )
+    TaskPlayAnim(cache.ped, "anim@heists@keycard@", "exit", 5.0, 1.0, -1, 16, 0, false, false, false)
     Wait(400)
-    ClearPedTasks(PlayerPedId())
+    ClearPedTasks(cache.ped)
 end
 
 local function openContract(bool)
@@ -347,7 +347,7 @@ local function GetClosestPlayer()
     local closestPlayers = QBCore.Functions.GetPlayersFromCoords()
     local closestDistance = -1
     local closestPlayer = -1
-    local coords = GetEntityCoords(PlayerPedId())
+    local coords = GetEntityCoords(cache.ped)
     for i=1, #closestPlayers, 1 do
         if closestPlayers[i] ~= PlayerId() then
             local pos = GetEntityCoords(GetPlayerPed(closestPlayers[i]))
@@ -363,7 +363,7 @@ local function GetClosestPlayer()
 end
 
 local function DoRamAnimation(bool)
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local dict = "missheistfbi3b_ig7"
     local anim = "lift_fibagent_loop"
     if bool then
@@ -432,7 +432,7 @@ local function FrontDoorCam(coords)
     RenderScriptCams(true, true, 500, true, true)
     TriggerEvent('qb-weathersync:client:EnableSync')
     FrontCam = true
-    FreezeEntityPosition(PlayerPedId(), true)
+    FreezeEntityPosition(cache.ped, true)
     Wait(500)
     DoScreenFadeIn(150)
     SendNUIMessage({
@@ -454,43 +454,45 @@ local function FrontDoorCam(coords)
                 })
                 Wait(500)
                 RenderScriptCams(false, true, 500, true, true)
-                FreezeEntityPosition(PlayerPedId(), false)
+                FreezeEntityPosition(cache.ped, false)
                 SetCamActive(cam, false)
                 DestroyCam(cam, true)
-                ClearTimecycleModifier("scanline_cam_cheap")
+                ClearTimecycleModifier()
                 cam = nil
                 FrontCam = false
                 Wait(500)
                 DoScreenFadeIn(150)
             end
 
-            local getCameraRot = GetCamRot(cam, 2)
+            if cam then
+                local getCameraRot = GetCamRot(cam, 2)
 
-            -- ROTATE UP
-            if IsControlPressed(0, 32) then -- W
-                if getCameraRot.x <= 0.0 then
-                    SetCamRot(cam, getCameraRot.x + 0.7, 0.0, getCameraRot.z, 2)
+                -- ROTATE UP
+                if IsControlPressed(0, 32) then -- W
+                    if getCameraRot.x <= 0.0 then
+                        SetCamRot(cam, getCameraRot.x + 0.7, 0.0, getCameraRot.z, 2)
+                    end
+                end
+
+                -- ROTATE DOWN
+                if IsControlPressed(0, 33) then -- S
+                    if getCameraRot.x >= -50.0 then
+                        SetCamRot(cam, getCameraRot.x - 0.7, 0.0, getCameraRot.z, 2)
+                    end
+                end
+
+                -- ROTATE LEFT
+                if IsControlPressed(0, 34) then -- A
+                    SetCamRot(cam, getCameraRot.x, 0.0, getCameraRot.z + 0.7, 2)
+                end
+
+                -- ROTATE RIGHT
+                if IsControlPressed(0, 35) then -- D
+                    SetCamRot(cam, getCameraRot.x, 0.0, getCameraRot.z - 0.7, 2)
                 end
             end
 
-            -- ROTATE DOWN
-            if IsControlPressed(0, 33) then -- S
-                if getCameraRot.x >= -50.0 then
-                    SetCamRot(cam, getCameraRot.x - 0.7, 0.0, getCameraRot.z, 2)
-                end
-            end
-
-            -- ROTATE LEFT
-            if IsControlPressed(0, 34) then -- A
-                SetCamRot(cam, getCameraRot.x, 0.0, getCameraRot.z + 0.7, 2)
-            end
-
-            -- ROTATE RIGHT
-            if IsControlPressed(0, 35) then -- D
-                SetCamRot(cam, getCameraRot.x, 0.0, getCameraRot.z - 0.7, 2)
-            end
-
-            Wait(1)
+            Wait(0)
         end
     end)
 end
@@ -505,7 +507,7 @@ local function disableViewCam()
 end
 
 local function SetClosestHouse()
-    local pos = GetEntityCoords(PlayerPedId(), true)
+    local pos = GetEntityCoords(cache.ped, true)
     local current = nil
     local dist = nil
     if not IsInside then
@@ -522,39 +524,35 @@ local function SetClosestHouse()
             end
         end
         ClosestHouse = current
-        if ClosestHouse ~= nil and tonumber(dist) < 30 then
-            QBCore.Functions.TriggerCallback('qb-houses:server:ProximityKO', function(key, owned)
-                HasHouseKey = key
-                isOwned = owned
-            end, ClosestHouse)
+        if ClosestHouse and tonumber(dist) < 30 then
+            HasHouseKey, isOwned = lib.callback.await('qb-houses:server:ProximityKO', false, ClosestHouse)
         end
     end
     TriggerEvent('qb-garages:client:setHouseGarage', ClosestHouse, HasHouseKey)
 end
 
 local function setHouseLocations()
-    if ClosestHouse ~= nil then
-        QBCore.Functions.TriggerCallback('qb-houses:server:getHouseLocations', function(result)
-            if result ~= nil then
-                if result.stash ~= nil then
-                    stashLocation = json.decode(result.stash)
-                    RegisterStashTarget()
-                end
-                if result.outfit ~= nil then
-                    outfitLocation = json.decode(result.outfit)
-                    RegisterOutfitsTarget()
-                end
-                if result.logout ~= nil then
-                    logoutLocation = json.decode(result.logout)
-                    RegisterCharactersTarget()
-                end
+    if ClosestHouse then
+        local result = lib.callback.await('qb-houses:server:getHouseLocations', false, ClosestHouse)
+        if result then
+            if result.stash then
+                stashLocation = json.decode(result.stash)
+                RegisterStashTarget()
             end
-        end, ClosestHouse)
+            if result.outfit then
+                outfitLocation = json.decode(result.outfit)
+                RegisterOutfitsTarget()
+            end
+            if result.logout then
+                logoutLocation = json.decode(result.logout)
+                RegisterCharactersTarget()
+            end
+        end
     end
 end
 
 local function UnloadDecorations()
-	if ObjectList ~= nil then
+	if ObjectList then
 		for _, v in pairs(ObjectList) do
 			if DoesEntityExist(v.object) then
 				DeleteObject(v.object)
@@ -565,34 +563,33 @@ end
 
 local function LoadDecorations(house)
 	if Config.Houses[house].decorations == nil or next(Config.Houses[house].decorations) == nil then
-		QBCore.Functions.TriggerCallback('qb-houses:server:getHouseDecorations', function(result)
-			Config.Houses[house].decorations = result
-			if Config.Houses[house].decorations ~= nil then
-				ObjectList = {}
-				for k, _ in pairs(Config.Houses[house].decorations) do
-					if Config.Houses[house].decorations[k] ~= nil then
-						if Config.Houses[house].decorations[k].object ~= nil then
-							if DoesEntityExist(Config.Houses[house].decorations[k].object) then
-								DeleteObject(Config.Houses[house].decorations[k].object)
-							end
-						end
-						local modelHash = GetHashKey(Config.Houses[house].decorations[k].hashname)
-						RequestModel(modelHash)
-						while not HasModelLoaded(modelHash) do
-							Wait(10)
-						end
-						local decorateObject = CreateObject(modelHash, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z, false, false, false)
-						FreezeEntityPosition(decorateObject, true)
-						SetEntityCoordsNoOffset(decorateObject, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z)
-						SetEntityRotation(decorateObject, Config.Houses[house].decorations[k].rotx, Config.Houses[house].decorations[k].roty, Config.Houses[house].decorations[k].rotz)
-						ObjectList[Config.Houses[house].decorations[k].objectId] = {hashname = Config.Houses[house].decorations[k].hashname, x = Config.Houses[house].decorations[k].x, y = Config.Houses[house].decorations[k].y, z = Config.Houses[house].decorations[k].z, rotx = Config.Houses[house].decorations[k].rotx, roty = Config.Houses[house].decorations[k].roty, rotz = Config.Houses[house].decorations[k].rotz, object = decorateObject, objectId = Config.Houses[house].decorations[k].objectId}
-					end
-				end
-			end
-		end, house)
+        local result = lib.callback.await('qb-houses:server:getHouseDecorations', false, house)
+        Config.Houses[house].decorations = result
+        if Config.Houses[house].decorations then
+            ObjectList = {}
+            for k in pairs(Config.Houses[house].decorations) do
+                if Config.Houses[house].decorations[k] then
+                    if Config.Houses[house].decorations[k].object then
+                        if DoesEntityExist(Config.Houses[house].decorations[k].object) then
+                            DeleteObject(Config.Houses[house].decorations[k].object)
+                        end
+                    end
+                    local modelHash = GetHashKey(Config.Houses[house].decorations[k].hashname)
+                    RequestModel(modelHash)
+                    while not HasModelLoaded(modelHash) do
+                        Wait(10)
+                    end
+                    local decorateObject = CreateObject(modelHash, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z, false, false, false)
+                    FreezeEntityPosition(decorateObject, true)
+                    SetEntityCoordsNoOffset(decorateObject, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z, false, false, false)
+                    SetEntityRotation(decorateObject, Config.Houses[house].decorations[k].rotx, Config.Houses[house].decorations[k].roty, Config.Houses[house].decorations[k].rotz, 0, false)
+                    ObjectList[Config.Houses[house].decorations[k].objectId] = {hashname = Config.Houses[house].decorations[k].hashname, x = Config.Houses[house].decorations[k].x, y = Config.Houses[house].decorations[k].y, z = Config.Houses[house].decorations[k].z, rotx = Config.Houses[house].decorations[k].rotx, roty = Config.Houses[house].decorations[k].roty, rotz = Config.Houses[house].decorations[k].rotz, object = decorateObject, objectId = Config.Houses[house].decorations[k].objectId}
+                end
+            end
+        end
 	elseif Config.Houses[house].decorations ~= nil then
 		ObjectList = {}
-		for k, _ in pairs(Config.Houses[house].decorations) do
+		for k in pairs(Config.Houses[house].decorations) do
 			if Config.Houses[house].decorations[k] ~= nil then
 				if Config.Houses[house].decorations[k].object ~= nil then
 					if DoesEntityExist(Config.Houses[house].decorations[k].object) then
@@ -607,9 +604,9 @@ local function LoadDecorations(house)
 				local decorateObject = CreateObject(modelHash, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z, false, false, false)
 				PlaceObjectOnGroundProperly(decorateObject)
 				FreezeEntityPosition(decorateObject, true)
-				SetEntityCoordsNoOffset(decorateObject, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z)
+				SetEntityCoordsNoOffset(decorateObject, Config.Houses[house].decorations[k].x, Config.Houses[house].decorations[k].y, Config.Houses[house].decorations[k].z, false, false, false)
 				Config.Houses[house].decorations[k].object = decorateObject
-				SetEntityRotation(decorateObject, Config.Houses[house].decorations[k].rotx, Config.Houses[house].decorations[k].roty, Config.Houses[house].decorations[k].rotz)
+				SetEntityRotation(decorateObject, Config.Houses[house].decorations[k].rotx, Config.Houses[house].decorations[k].roty, Config.Houses[house].decorations[k].rotz, 0, false)
 				ObjectList[Config.Houses[house].decorations[k].objectId] = {hashname = Config.Houses[house].decorations[k].hashname, x = Config.Houses[house].decorations[k].x, y = Config.Houses[house].decorations[k].y, z = Config.Houses[house].decorations[k].z, rotx = Config.Houses[house].decorations[k].rotx, roty = Config.Houses[house].decorations[k].roty, rotz = Config.Houses[house].decorations[k].rotz, object = decorateObject, objectId = Config.Houses[house].decorations[k].objectId}
 			end
 		end
@@ -617,7 +614,7 @@ local function LoadDecorations(house)
 end
 
 local function CheckDistance(target, distance)
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local pos = GetEntityCoords(ped)
 
     return #(pos - target) <= distance
@@ -638,12 +635,7 @@ local function getKeyHolders()
     if fetchingHouseKeys then return end
     fetchingHouseKeys = true
 
-    local p = promise.new()
-    QBCore.Functions.TriggerCallback('qb-houses:server:getHouseKeyHolders', function(holders)
-        p:resolve(holders)
-    end,ClosestHouse)
-
-    return Citizen.Await(p)
+    return lib.callback.await('qb-houses:server:getHouseKeyHolders', false, ClosestHouse)
 end
 
 function HouseKeysMenu()
@@ -944,8 +936,8 @@ local function LeaveHouse(house)
             TriggerEvent('qb-weathersync:client:EnableSync')
             Wait(250)
             DoScreenFadeIn(250)
-            SetEntityCoords(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z)
-            SetEntityHeading(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.h)
+            SetEntityCoords(cache.ped, Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z, false, false, false, false)
+            SetEntityHeading(cache.ped, Config.Houses[CurrentHouse].coords.enter.h)
             TriggerEvent('qb-weed:client:leaveHouse')
             TriggerServerEvent('qb-houses:server:SetInsideMeta', house, false)
             CurrentHouse = nil
@@ -989,7 +981,7 @@ local function enterNonOwnedHouse(house)
 end
 
 local function isNearHouses()
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local pos = GetEntityCoords(ped)
 
     if ClosestHouse ~= nil then
@@ -1020,7 +1012,7 @@ RegisterNetEvent('qb-houses:client:sellHouse', function()
 end)
 
 RegisterNetEvent('qb-houses:client:EnterHouse', function()
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local pos = GetEntityCoords(ped)
 
     if ClosestHouse ~= nil then
@@ -1074,8 +1066,8 @@ RegisterNetEvent('qb-houses:client:lockHouse', function(bool, house)
 end)
 
 RegisterNetEvent('qb-houses:client:createHouses', function(price, tier)
-    local pos = GetEntityCoords(PlayerPedId())
-    local heading = GetEntityHeading(PlayerPedId())
+    local pos = GetEntityCoords(cache.ped)
+    local heading = GetEntityHeading(cache.ped)
 	local s1, _ = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
     local street = GetStreetNameFromHashKey(s1)
     local coords = {
@@ -1089,8 +1081,8 @@ end)
 
 RegisterNetEvent('qb-houses:client:addGarage', function()
     if ClosestHouse ~= nil then
-        local pos = GetEntityCoords(PlayerPedId())
-        local heading = GetEntityHeading(PlayerPedId())
+        local pos = GetEntityCoords(cache.ped)
+        local heading = GetEntityHeading(cache.ped)
         local coords = {
             x = pos.x,
             y = pos.y,
@@ -1104,7 +1096,7 @@ RegisterNetEvent('qb-houses:client:addGarage', function()
 end)
 
 RegisterNetEvent('qb-houses:client:toggleDoorlock', function()
-    local pos = GetEntityCoords(PlayerPedId())
+    local pos = GetEntityCoords(cache.ped)
     local dist = #(pos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
     if dist <= 1.5 then
         if HasHouseKey then
@@ -1135,7 +1127,7 @@ RegisterNetEvent('qb-houses:client:giveHouseKey', function()
     local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 2.5 and ClosestHouse ~= nil then
         local playerId = GetPlayerServerId(player)
-        local pedpos = GetEntityCoords(PlayerPedId())
+        local pedpos = GetEntityCoords(cache.ped)
         local housedist = #(pedpos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
         if housedist < 10 then
             TriggerServerEvent('qb-houses:server:giveHouseKey', playerId, ClosestHouse)
@@ -1151,16 +1143,15 @@ end)
 
 RegisterNetEvent('qb-houses:client:removeHouseKey', function()
     if ClosestHouse ~= nil then
-        local pedpos = GetEntityCoords(PlayerPedId())
+        local pedpos = GetEntityCoords(cache.ped)
         local housedist = #(pedpos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
         if housedist <= 5 then
-            QBCore.Functions.TriggerCallback('qb-houses:server:getHouseOwner', function(result)
-                if QBCore.Functions.GetPlayerData().citizenid == result then
-                    HouseKeysMenu()
-                else
-                    QBCore.Functions.Notify(Lang:t("error.not_owner"), "error")
-                end
-            end, ClosestHouse)
+            local result = lib.callback.await('qb-houses:server:getHouseOwner', false, ClosestHouse)
+            if QBCore.Functions.GetPlayerData().citizenid == result then
+                HouseKeysMenu()
+            else
+                QBCore.Functions.Notify(Lang:t("error.not_owner"), "error")
+            end
         else
             QBCore.Functions.Notify(Lang:t("error.no_door"), "error")
         end
@@ -1179,7 +1170,7 @@ RegisterNetEvent('qb-houses:client:refreshHouse', function()
 end)
 
 RegisterNetEvent('qb-houses:client:SpawnInApartment', function(house)
-    local pos = GetEntityCoords(PlayerPedId())
+    local pos = GetEntityCoords(cache.ped)
     if rangDoorbell ~= nil then
         if #(pos - vector3(Config.Houses[house].coords.enter.x, Config.Houses[house].coords.enter.y, Config.Houses[house].coords.enter.z)) > 5 then
             return
@@ -1209,23 +1200,22 @@ RegisterNetEvent('qb-houses:client:setupHouseBlips', function() -- Setup owned o
     CreateThread(function()
         Wait(2000)
         if LocalPlayer.state['isLoggedIn'] then
-            QBCore.Functions.TriggerCallback('qb-houses:server:getOwnedHouses', function(ownedHouses)
-                if ownedHouses then
-                    for k, _ in pairs(ownedHouses) do
-                        local house = Config.Houses[ownedHouses[k]]
-                        local HouseBlip = AddBlipForCoord(house.coords.enter.x, house.coords.enter.y, house.coords.enter.z)
-                        SetBlipSprite (HouseBlip, 40)
-                        SetBlipDisplay(HouseBlip, 4)
-                        SetBlipScale  (HouseBlip, 0.65)
-                        SetBlipAsShortRange(HouseBlip, true)
-                        SetBlipColour(HouseBlip, 3)
-                        AddTextEntry('OwnedHouse', house.adress)
-                        BeginTextCommandSetBlipName('OwnedHouse')
-                        EndTextCommandSetBlipName(HouseBlip)
-                        OwnedHouseBlips[#OwnedHouseBlips+1] = HouseBlip
-                    end
+            local ownedHouses = lib.callback.await('qb-houses:server:getOwnedHouses', false)
+            if ownedHouses then
+                for k in pairs(ownedHouses) do
+                    local house = Config.Houses[ownedHouses[k]]
+                    local HouseBlip = AddBlipForCoord(house.coords.enter.x, house.coords.enter.y, house.coords.enter.z)
+                    SetBlipSprite (HouseBlip, 40)
+                    SetBlipDisplay(HouseBlip, 4)
+                    SetBlipScale  (HouseBlip, 0.65)
+                    SetBlipAsShortRange(HouseBlip, true)
+                    SetBlipColour(HouseBlip, 3)
+                    AddTextEntry('OwnedHouse', house.adress)
+                    BeginTextCommandSetBlipName('OwnedHouse')
+                    EndTextCommandSetBlipName(HouseBlip)
+                    OwnedHouseBlips[#OwnedHouseBlips + 1] = HouseBlip
                 end
-            end)
+            end
         end
     end)
 end)
@@ -1290,7 +1280,7 @@ RegisterNetEvent('qb-houses:client:viewHouse', function(houseprice, brokerfee, b
 end)
 
 RegisterNetEvent('qb-houses:client:setLocation', function(cData)
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local pos = GetEntityCoords(ped)
     local coords = {x = pos.x, y = pos.y, z = pos.z}
     if IsInside then
@@ -1334,60 +1324,59 @@ RegisterNetEvent('qb-houses:client:refreshLocations', function(house, location, 
 end)
 
 RegisterNetEvent('qb-houses:client:HomeInvasion', function()
-    local ped = PlayerPedId()
+    local ped = cache.ped
     local pos = GetEntityCoords(ped)
     local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-    if ClosestHouse ~= nil then
-        QBCore.Functions.TriggerCallback('police:server:IsPoliceForcePresent', function(IsPresent)
-            if IsPresent then
-                local dist = #(pos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
-                if Config.Houses[ClosestHouse].IsRaming == nil then
-                    Config.Houses[ClosestHouse].IsRaming = false
-                end
-                if dist < 1 then
-                    if Config.Houses[ClosestHouse].locked then
-                        if not Config.Houses[ClosestHouse].IsRaming then
-                            DoRamAnimation(true)
-                            Skillbar.Start({
-                                duration = math.random(5000, 10000),
-                                pos = math.random(10, 30),
-                                width = math.random(10, 20),
-                            }, function()
-                                if RamsDone + 1 >= Config.RamsNeeded then
-                                    TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                                    QBCore.Functions.Notify(Lang:t("success.home_invasion"), 'success')
-                                    TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
-                                    TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                                    DoRamAnimation(false)
-                                else
-                                    DoRamAnimation(true)
-                                    Skillbar.Repeat({
-                                        duration = math.random(500, 1000),
-                                        pos = math.random(10, 30),
-                                        width = math.random(5, 12),
-                                    })
-                                    RamsDone = RamsDone + 1
-                                end
-                            end, function()
-                                RamsDone = 0
+    if ClosestHouse then
+        local IsPresent = lib.callback.await('police:server:IsPoliceForcePresent', false)
+        if IsPresent then
+            local dist = #(pos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
+            if Config.Houses[ClosestHouse].IsRaming == nil then
+                Config.Houses[ClosestHouse].IsRaming = false
+            end
+            if dist < 1 then
+                if Config.Houses[ClosestHouse].locked then
+                    if not Config.Houses[ClosestHouse].IsRaming then
+                        DoRamAnimation(true)
+                        Skillbar.Start({
+                            duration = math.random(5000, 10000),
+                            pos = math.random(10, 30),
+                            width = math.random(10, 20),
+                        }, function()
+                            if RamsDone + 1 >= Config.RamsNeeded then
+                                TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
+                                QBCore.Functions.Notify(Lang:t("success.home_invasion"), 'success')
+                                TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
                                 TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                                QBCore.Functions.Notify(Lang:t("error.failed_invasion"), 'error')
                                 DoRamAnimation(false)
-                            end)
-                            TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
-                        else
-                            QBCore.Functions.Notify(Lang:t("error.inprogress_invasion"), 'error')
-                        end
+                            else
+                                DoRamAnimation(true)
+                                Skillbar.Repeat({
+                                    duration = math.random(500, 1000),
+                                    pos = math.random(10, 30),
+                                    width = math.random(5, 12),
+                                })
+                                RamsDone = RamsDone + 1
+                            end
+                        end, function()
+                            RamsDone = 0
+                            TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
+                            QBCore.Functions.Notify(Lang:t("error.failed_invasion"), 'error')
+                            DoRamAnimation(false)
+                        end)
+                        TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
                     else
-                        QBCore.Functions.Notify(Lang:t("error.already_open"), 'error')
+                        QBCore.Functions.Notify(Lang:t("error.inprogress_invasion"), 'error')
                     end
                 else
-                    QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
+                    QBCore.Functions.Notify(Lang:t("error.already_open"), 'error')
                 end
             else
-                QBCore.Functions.Notify(Lang:t("error.no_police"), 'error')
+                QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
             end
-        end)
+        else
+            QBCore.Functions.Notify(Lang:t("error.no_police"), 'error')
+        end
     else
         QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
     end
@@ -1469,8 +1458,8 @@ RegisterNetEvent('qb-houses:client:ChangeCharacter', function()
         end
         exports['qbx-interior']:DespawnInterior(houseObj, function()
             TriggerEvent('qb-weathersync:client:EnableSync')
-            SetEntityCoords(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5)
-            SetEntityHeading(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.h)
+            SetEntityCoords(cache.ped, Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5, false, false, false, false)
+            SetEntityHeading(cache.ped, Config.Houses[CurrentHouse].coords.enter.h)
             InOwnedHouse = false
             IsInside = false
             TriggerServerEvent('qb-houses:server:LogoutLocation')
@@ -1505,9 +1494,11 @@ end)
 -- NUI Callbacks
 
 RegisterNUICallback('HasEnoughMoney', function(cData, cb)
-    QBCore.Functions.TriggerCallback('qb-houses:server:HasEnoughMoney', function(_)
-        cb('ok')
-    end, cData.objectData)
+    -- Non-existant callback, but I'll leave it here in-case anyone wants to make it
+    -- lib.callback('qb-houses:server:HasEnoughMoney', false, function()
+
+    -- end, cData.objectData)
+    cb('ok')
 end)
 
 RegisterNUICallback('buy', function(_, cb)
@@ -1581,7 +1572,7 @@ CreateThread(function ()
 end)
 
 RegisterCommand('getoffset', function()
-    local coords = GetEntityCoords(PlayerPedId())
+    local coords = GetEntityCoords(cache.ped)
     local houseCoords = vector3(
         Config.Houses[CurrentHouse].coords.enter.x,
         Config.Houses[CurrentHouse].coords.enter.y,
@@ -1595,4 +1586,4 @@ RegisterCommand('getoffset', function()
         print('Y: '..ydist)
         print('Z: '..zdist)
     end
-end)
+end, false)
