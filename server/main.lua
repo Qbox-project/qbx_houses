@@ -126,9 +126,9 @@ local function GetHouseStreetCount(street)
     local result = MySQL.Sync.fetchSingle('SELECT * FROM houselocations WHERE name LIKE ? ORDER BY LENGTH(`name`) desc, `name` DESC', {query})
     if result then
         local houseAddress = result.name
-        count = tonumber(string.match(houseAddress, '%d[%d.,]*'))
+        count = tonumber(string.match(houseAddress, '%d[%d.,]*')) --[[@as number]]
     end
-    return (count + 1)
+    return count + 1
 end
 
 local function isHouseOwned(house)
@@ -369,93 +369,56 @@ end)
 
 -- Callbacks
 
-QBCore.Functions.CreateCallback('qb-houses:server:buyFurniture', function(source, cb, price)
-    local src = source
-    local pData = QBCore.Functions.GetPlayer(src)
+lib.callback.register('qb-houses:server:buyFurniture', function(source, price)
+    local pData = QBCore.Functions.GetPlayer(source)
     local bankBalance = pData.PlayerData.money["bank"]
 
     if bankBalance >= price then
         pData.Functions.RemoveMoney('bank', price, "bought-furniture")
-        cb(true)
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_enough_money"), "error")
-        cb(false)
-    end
-end)
-
-QBCore.Functions.CreateCallback('qb-houses:server:ProximityKO', function(source, cb, house)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local retvalK = false
-    local retvalO
-
-    if Player then
-        local identifier = Player.PlayerData.license
-        local CharId = Player.PlayerData.citizenid
-        if hasKey(identifier, CharId, house) then
-            retvalK = true
-        elseif Player.PlayerData.job.name == "realestate" then
-            retvalK = true
-        else
-            retvalK = false
-        end
+        return true
     end
 
-    if houseowneridentifier[house] and houseownercid[house] then
-        retvalO = true
-    else
-        retvalO = false
-    end
-
-    cb(retvalK, retvalO)
+    TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_enough_money"), "error")
+    return false
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:hasKey', function(source, cb, house)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local retval = false
-    if Player then
-        local identifier = Player.PlayerData.license
-        local CharId = Player.PlayerData.citizenid
-        if hasKey(identifier, CharId, house) then
-            retval = true
-        elseif Player.PlayerData.job.name == "realestate" then
-            retval = true
-        else
-            retval = false
-        end
-    end
+lib.callback.register('qb-houses:server:ProximityKO', function(source, house)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return end
 
-    cb(retval)
+    local identifier = Player.PlayerData.license
+    local CharId = Player.PlayerData.citizenid
+    return hasKey(identifier, CharId, house) or Player.PlayerData.job.name == "realestate", houseowneridentifier[house] and houseownercid[house]
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:isOwned', function(source, cb, house)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player and Player.PlayerData and Player.PlayerData.job and Player.PlayerData.job.name == "realestate" then
-        cb(true)
-    elseif houseowneridentifier[house] and houseownercid[house] then
-        cb(true)
-    else
-        cb(false)
-    end
+lib.callback.register('qb-houses:server:hasKey', function(source, house)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return end
+
+    local identifier = Player.PlayerData.license
+    local CharId = Player.PlayerData.citizenid
+    return hasKey(identifier, CharId, house) or Player.PlayerData.job.name == "realestate"
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getHouseOwner', function(_, cb, house)
-    cb(houseownercid[house])
+lib.callback.register('qb-houses:server:isOwned', function(source, house)
+    local Player = QBCore.Functions.GetPlayer(source)
+    return Player and Player.PlayerData and Player.PlayerData.job and Player.PlayerData.job.name == "realestate" or houseowneridentifier[house] and houseownercid[house]
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getHouseKeyHolders', function(source, cb, house)
+lib.callback.register('qb-houses:server:getHouseOwner', function(_, house)
+    return houseownercid[house]
+end)
+
+lib.callback.register('qb-houses:server:getHouseKeyHolders', function(source, house)
     local retval = {}
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
     if housekeyholders[house] then
         for i = 1, #housekeyholders[house], 1 do
             if Player.PlayerData.citizenid ~= housekeyholders[house][i] then
                 local result = MySQL.query.await('SELECT charinfo FROM players WHERE citizenid = ?', {housekeyholders[house][i]})
                 if result[1] then
                     local charinfo = json.decode(result[1].charinfo)
-                    retval[#retval+1] = {
+                    retval[#retval + 1] = {
                         firstname = charinfo.firstname,
                         lastname = charinfo.lastname,
                         citizenid = housekeyholders[house][i]
@@ -463,13 +426,11 @@ QBCore.Functions.CreateCallback('qb-houses:server:getHouseKeyHolders', function(
                 end
             end
         end
-        cb(retval)
-    else
-        cb(nil)
+        return retval
     end
 end)
 
-QBCore.Functions.CreateCallback('qb-phone:server:TransferCid', function(_, cb, NewCid, house)
+lib.callback.register('qb-phone:server:TransferCid', function(_, NewCid, house)
     local result = MySQL.query.await('SELECT * FROM players WHERE citizenid = ?', {NewCid})
     if result[1] then
         local HouseName = house.name
@@ -477,16 +438,14 @@ QBCore.Functions.CreateCallback('qb-phone:server:TransferCid', function(_, cb, N
         housekeyholders[HouseName][1] = NewCid
         houseownercid[HouseName] = NewCid
         houseowneridentifier[HouseName] = result[1].license
-        MySQL.update(
-            'UPDATE player_houses SET citizenid = ?, keyholders = ?, identifier = ? WHERE house = ?',
-            {NewCid, json.encode(housekeyholders[HouseName]), result[1].license, HouseName})
-        cb(true)
-    else
-        cb(false)
+        MySQL.update('UPDATE player_houses SET citizenid = ?, keyholders = ?, identifier = ? WHERE house = ?', {NewCid, json.encode(housekeyholders[HouseName]), result[1].license, HouseName})
+        return true
     end
+
+    return false
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getHouseDecorations', function(_, cb, house)
+lib.callback.register('qb-houses:server:getHouseDecorations', function(_, house)
     local retval = nil
     local result = MySQL.query.await('SELECT * FROM player_houses WHERE house = ?', {house})
     if result[1] then
@@ -494,61 +453,43 @@ QBCore.Functions.CreateCallback('qb-houses:server:getHouseDecorations', function
             retval = json.decode(result[1].decorations)
         end
     end
-    cb(retval)
+    return retval
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getHouseLocations', function(_, cb, house)
-    local retval = nil
+lib.callback.register('qb-houses:server:getHouseLocations', function(_, house)
     local result = MySQL.query.await('SELECT * FROM player_houses WHERE house = ?', {house})
-    if result[1] then
-        retval = result[1]
-    end
-    cb(retval)
+    return result[1]
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getOwnedHouses', function(source, cb)
-    local src = source
-    local pData = QBCore.Functions.GetPlayer(src)
-    if pData then
-        MySQL.query('SELECT * FROM player_houses WHERE identifier = ? AND citizenid = ?', {pData.PlayerData.license, pData.PlayerData.citizenid}, function(houses)
-            local ownedHouses = {}
-            for i = 1, #houses, 1 do
-                ownedHouses[#ownedHouses+1] = houses[i].house
-            end
-            if houses then
-                cb(ownedHouses)
-            else
-                cb(nil)
-            end
-        end)
+lib.callback.register('qb-houses:server:getOwnedHouses', function(source)
+    local pData = QBCore.Functions.GetPlayer(source)
+    if not pData then return end
+    local houses = MySQL.query.await('SELECT * FROM player_houses WHERE identifier = ? AND citizenid = ?', {pData.PlayerData.license, pData.PlayerData.citizenid})
+    if houses then
+        local ownedHouses = {}
+        for i = 1, #houses, 1 do
+            ownedHouses[#ownedHouses+1] = houses[i].house
+        end
+        return ownedHouses
     end
 end)
 
-QBCore.Functions.CreateCallback('qb-houses:server:getSavedOutfits', function(source, cb)
-    local src = source
-    local pData = QBCore.Functions.GetPlayer(src)
+lib.callback.register('qb-houses:server:getSavedOutfits', function(source)
+    local pData = QBCore.Functions.GetPlayer(source)
 
     if pData then
-        MySQL.query('SELECT * FROM player_outfits WHERE citizenid = ?', {pData.PlayerData.citizenid},
-            function(result)
-                if result[1] then
-                    cb(result)
-                else
-                    cb(nil)
-                end
-            end)
+        local result = MySQL.query.await('SELECT * FROM player_outfits WHERE citizenid = ?', {pData.PlayerData.citizenid})
+        return result[1] and result
     end
 end)
 
-QBCore.Functions.CreateCallback('qb-phone:server:GetPlayerHouses', function(source, cb)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+lib.callback.register('qb-phone:server:GetPlayerHouses', function(source)
+    local Player = QBCore.Functions.GetPlayer(source)
     local MyHouses = {}
-    local result = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?',
-        {Player.PlayerData.citizenid})
+    local result = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?', {Player.PlayerData.citizenid})
     if result and result[1] then
         for k, v in pairs(result) do
-            MyHouses[#MyHouses+1] = {
+            MyHouses[#MyHouses + 1] = {
                 name = v.house,
                 keyholders = {},
                 owner = Player.PlayerData.citizenid,
@@ -562,8 +503,7 @@ QBCore.Functions.CreateCallback('qb-phone:server:GetPlayerHouses', function(sour
                 v.keyholders = json.decode(v.keyholders)
                 if v.keyholders then
                     for _, data in pairs(v.keyholders) do
-                        local keyholderdata = MySQL.query.await('SELECT * FROM players WHERE citizenid = ?',
-                            {data})
+                        local keyholderdata = MySQL.query.await('SELECT * FROM players WHERE citizenid = ?', {data})
                         if keyholderdata[1] then
                             keyholderdata[1].charinfo = json.decode(keyholderdata[1].charinfo)
 
@@ -600,17 +540,15 @@ QBCore.Functions.CreateCallback('qb-phone:server:GetPlayerHouses', function(sour
             end
         end
 
-        SetTimeout(100, function()
-            cb(MyHouses)
-        end)
-    else
-        cb({})
+        Wait(100)
+        return MyHouses
     end
+
+    return {}
 end)
 
-QBCore.Functions.CreateCallback('qb-phone:server:GetHouseKeys', function(source, cb)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+lib.callback.register('qb-phone:server:GetHouseKeys', function(source)
+    local Player = QBCore.Functions.GetPlayer(source)
     local MyKeys = {}
 
     local result = MySQL.query.await('SELECT * FROM player_houses', {})
@@ -618,8 +556,8 @@ QBCore.Functions.CreateCallback('qb-phone:server:GetHouseKeys', function(source,
         if v.keyholders ~= "null" then
             v.keyholders = json.decode(v.keyholders)
             for _, p in pairs(v.keyholders) do
-                if p == Player.PlayerData.citizenid and (v.citizenid ~= Player.PlayerData.citizenid) then
-                    MyKeys[#MyKeys+1] = {
+                if p == Player.PlayerData.citizenid and v.citizenid ~= Player.PlayerData.citizenid then
+                    MyKeys[#MyKeys + 1] = {
                         HouseData = Config.Houses[v.house]
                     }
                 end
@@ -627,24 +565,23 @@ QBCore.Functions.CreateCallback('qb-phone:server:GetHouseKeys', function(source,
         end
 
         if v.citizenid == Player.PlayerData.citizenid then
-            MyKeys[#MyKeys+1] = {
+            MyKeys[#MyKeys + 1] = {
                 HouseData = Config.Houses[v.house]
             }
         end
     end
-    cb(MyKeys)
+
+    return MyKeys
 end)
 
-QBCore.Functions.CreateCallback('qb-phone:server:MeosGetPlayerHouses', function(_, cb, input)
+lib.callback.register('qb-phone:server:MeosGetPlayerHouses', function(_, input)
     if input then
         local search = escape_sqli(input)
         local searchData = {}
         local query = '%' .. search .. '%'
-        local result = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? OR charinfo LIKE ?',
-            {search, query})
+        local result = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? OR charinfo LIKE ?', {search, query})
         if result[1] then
-            local houses = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?',
-                {result[1].citizenid})
+            local houses = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?', {result[1].citizenid})
             if houses[1] then
                 for _, v in pairs(houses) do
                     searchData[#searchData+1] = {
@@ -663,13 +600,9 @@ QBCore.Functions.CreateCallback('qb-phone:server:MeosGetPlayerHouses', function(
                         }
                     }
                 end
-                cb(searchData)
+                return searchData
             end
-        else
-            cb(nil)
         end
-    else
-        cb(nil)
     end
 end)
 
