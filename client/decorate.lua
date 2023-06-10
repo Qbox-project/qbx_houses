@@ -36,19 +36,19 @@ local function closeDecorateUI()
 end
 
 local function CreateEditCamera()
-	local rot = GetEntityRotation(PlayerPedId())
-	local pos = GetEntityCoords(PlayerPedId(), true)
+	local rot = GetEntityRotation(cache.ped)
+	local pos = GetEntityCoords(cache.ped, true)
 	MainCamera = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, 60.00, false, 0)
 	SetCamActive(MainCamera, true)
 	RenderScriptCams(true, false, 1, true, true)
 end
 
 local function EnableEditMode()
-	local pos = GetEntityCoords(PlayerPedId(), true)
+	local pos = GetEntityCoords(cache.ped, true)
 	curPos = {x = pos.x, y = pos.y, z = pos.z}
-	SetEntityVisible(PlayerPedId(), false)
-	FreezeEntityPosition(PlayerPedId(), true)
-	SetEntityCollision(PlayerPedId(), false, false)
+	SetEntityVisible(cache.ped, false, false)
+	FreezeEntityPosition(cache.ped, true)
+	SetEntityCollision(cache.ped, false, false)
 	CreateEditCamera()
 	DecoMode = true
 	TriggerEvent('qb-anticheat:client:ToggleDecorate', true)
@@ -84,9 +84,9 @@ end
 
 local function DisableEditMode()
 	SaveDecorations()
-	SetEntityVisible(PlayerPedId(), true)
-	FreezeEntityPosition(PlayerPedId(), false)
-	SetEntityCollision(PlayerPedId(), true, true)
+	SetEntityVisible(cache.ped, true, false)
+	FreezeEntityPosition(cache.ped, false)
+	SetEntityCollision(cache.ped, true, true)
 	SetDefaultCamera()
 	EnableAllControlActions(0)
 	ObjectList = nil
@@ -125,7 +125,7 @@ local function CheckObjMovementInput()
 		SelObjPos = GetOffsetFromEntityInWorldCoords(SelectedObj, 0, 0, -zVect)
     end
 
-	SetEntityCoords(SelectedObj, SelObjPos.x, SelObjPos.y, SelObjPos.z)
+	SetEntityCoords(SelectedObj, SelObjPos.x, SelObjPos.y, SelObjPos.z, false, false, false, false)
 end
 
 local function CheckObjRotationInput()
@@ -157,7 +157,7 @@ local function CheckObjRotationInput()
 		SelObjRot.y = SelObjRot.y - yVect
     end
 
-	SetEntityRotation(SelectedObj, SelObjRot.x, SelObjRot.y, SelObjRot.z)
+	SetEntityRotation(SelectedObj, SelObjRot.x, SelObjRot.y, SelObjRot.z, 0, false)
 end
 
 local function CheckRotationInput()
@@ -263,22 +263,19 @@ RegisterNUICallback("cancelSelectedObject", function(_, cb)
 end)
 
 RegisterNUICallback("buySelectedObject", function(data, cb)
-    QBCore.Functions.TriggerCallback('qb-houses:server:buyFurniture', function(isSuccess)
-        if isSuccess then
-            SetNuiFocus(false, false)
-            cursorEnabled = false
-            SaveDecorations()
-            SelectedObj = nil
-            SelObjId = 0
-            peanut = false
-        else
-            DeleteObject(SelectedObj)
-            SelectedObj = nil
-            SelObjId = 0
-            peanut = false
-        end
-		cb('ok')
-    end, data.price)
+	local isSuccess = lib.callback.await('qb-houses:server:buyFurniture', false, data.price)
+	if isSuccess then
+		SetNuiFocus(false, false)
+		cursorEnabled = false
+		SaveDecorations()
+	else
+		DeleteObject(SelectedObj)
+	end
+
+	SelectedObj = nil
+	SelObjId = 0
+	peanut = false
+	cb('ok')
 end)
 
 RegisterNUICallback('setupMyObjects', function(_, cb)
@@ -318,7 +315,7 @@ end)
 
 RegisterNUICallback('selectOwnedObject', function(data, cb)
 	local objectData = data.objectData
-	local ownedObject = GetClosestObjectOfType(objectData.x, objectData.y, objectData.z, 1.5, GetHashKey(objectData.hashname), false, 6, 7)
+	local ownedObject = GetClosestObjectOfType(objectData.x, objectData.y, objectData.z, 1.5, GetHashKey(objectData.hashname), false, true, true)
 	local pos = GetEntityCoords(ownedObject, true)
     local rot = GetEntityRotation(ownedObject)
     SelObjRot = {x = rot.x, y = rot.y, z = rot.z}
@@ -335,7 +332,7 @@ RegisterNUICallback('editOwnedObject', function(data, cb)
 	SetNuiFocus(false, false)
 	cursorEnabled = false
 	local objectData = data.objectData
-	local ownedObject = GetClosestObjectOfType(objectData.x, objectData.y, objectData.z, 1.5, GetHashKey(objectData.hashname), false, 6, 7)
+	local ownedObject = GetClosestObjectOfType(objectData.x, objectData.y, objectData.z, 1.5, GetHashKey(objectData.hashname), false, true, true)
 	local pos = GetEntityCoords(ownedObject, true)
 	local rot = GetEntityRotation(ownedObject)
     SelObjRot = {x = rot.x, y = rot.y, z = rot.z}
@@ -370,7 +367,7 @@ RegisterNUICallback("spawnobject", function(data, cb)
 	local modelHash = GetHashKey(tostring(data.object))
 	RequestModel(modelHash)
 	while not HasModelLoaded(modelHash) do
-	    Wait(1000)
+		Wait(1000)
 	end
 	local rotation = GetCamRot(MainCamera, 2)
 	local xVect = 2.5 * math.sin( degToRad( rotation.z ) ) * -1.0
@@ -382,7 +379,7 @@ RegisterNUICallback("spawnobject", function(data, cb)
 	SelObjPos = {x = pos.x, y = pos.y, z = pos.z}
 	SelObjHash = data.object
 	PlaceObjectOnGroundProperly(SelectedObj)
-	SetEntityCompletelyDisableCollision(SelectedObj, true) -- Prevents crazy physics when collidin with other entitys
+	SetEntityCompletelyDisableCollision(SelectedObj, true, false) -- Prevents crazy physics when collidin with other entitys
     peanut = true
 	cb("ok")
 end)
@@ -401,7 +398,7 @@ RegisterNUICallback("chooseobject", function(data, cb)
 			break
 		end
 		count = count + 1
-	    Wait(1000)
+		Wait(1000)
 	end
 
 	-- Make buttons selectable again
@@ -421,7 +418,7 @@ end)
 
 CreateThread(function()
 	while true do
-		Wait(7)
+		Wait(0)
 		if DecoMode then
 			DisableAllControlActions(0)
 			EnableControlAction(0, 32, true) -- W
@@ -447,8 +444,8 @@ CreateThread(function()
             CheckMovementInput()
 
 			if SelectedObj and peanut then
-		SetEntityDrawOutline(SelectedObj)
-		SetEntityDrawOutlineColor(116, 189, 252, 100)
+				SetEntityDrawOutline(SelectedObj, true)
+				SetEntityDrawOutlineColor(116, 189, 252, 100)
                 DrawMarker(21, SelObjPos.x, SelObjPos.y, SelObjPos.z + 1.28, 0.0, 0.0, 0.0, 180.0, 0.0, 0.0, 0.6, 0.6, 0.6, 28, 149, 255, 100, true, true, 2, false, false, false, false)
                 if rotateActive then
                     CheckObjRotationInput()
@@ -487,7 +484,7 @@ CreateThread(function()
 						cursorEnabled = true
 					end
 				end
-                        end
+			end
 		end
 	end
 end)
@@ -495,7 +492,7 @@ end)
 -- Out of area
 CreateThread(function()
 	while true do
-		Wait(7)
+		Wait(0)
 		if DecoMode then
 			local camPos = GetCamCoord(MainCamera)
 			local dist = #(vector3(camPos.x, camPos.y, camPos.z) - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
