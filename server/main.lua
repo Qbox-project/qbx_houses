@@ -56,24 +56,43 @@ end)
 
 -- Commands
 
-QBCore.Commands.Add("decorate", Lang:t("info.decorate_interior"), {}, false, function(source)
+lib.addCommand("decorate", {
+    help = Lang:t("info.decorate_interior"),
+}, function(source, args, raw)
     local src = source
     TriggerClientEvent("qb-houses:client:decorate", src)
 end)
 
-QBCore.Commands.Add("createhouse", Lang:t("info.create_house"), {{name = "price", help = Lang:t("info.price_of_house")}, {name = "tier", help = Lang:t("info.tier_number")}}, true, function(source, args)
+lib.addCommand("createhouse", {
+    help = Lang:t("info.create_house"),
+    params = {
+        {
+            name = 'price',
+            type = 'number',
+            help = Lang:t("info.price_of_house"),
+            optional = false
+        },
+        {
+            name = 'tier',
+            type = 'number',
+            help = Lang:t("info.tier_number"),
+            optional = false
+        }
+    },
+    restricted = 'group.admin'
+}, function(source, args, raw)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local price = tonumber(args[1])
-    local tier = tonumber(args[2])
     if Player.PlayerData.job.name == "realestate" then
-        TriggerClientEvent("qb-houses:client:createHouses", src, price, tier)
+        TriggerClientEvent("qb-houses:client:createHouses", src, args.price, args.tier)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.realestate_only"), "error")
     end
 end)
 
-QBCore.Commands.Add("addgarage", Lang:t('info.add_garage'), {}, false, function(source)
+lib.addCommand("addgarage", {
+    help = Lang:t('info.add_garage'),
+}, function(source, args, raw)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if Player.PlayerData.job.name == "realestate" then
@@ -83,7 +102,9 @@ QBCore.Commands.Add("addgarage", Lang:t('info.add_garage'), {}, false, function(
     end
 end)
 
-QBCore.Commands.Add("ring", Lang:t("info.ring_doorbell"), {}, false, function(source)
+lib.addCommand("ring", {
+    help = Lang:t("info.ring_doorbell"),
+}, function(source, args, raw)
     local src = source
     TriggerClientEvent('qb-houses:client:RequestRing', src)
 end)
