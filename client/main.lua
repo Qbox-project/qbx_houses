@@ -642,10 +642,10 @@ function HouseKeysMenu()
     fetchingHouseKeys = false
 
     if holders == nil or next(holders) == nil then
-        QBCore.Functions.Notify(Lang:t("error.no_key_holders"), "error", 3500)
+        lib.notify({description = Lang:t("error.no_key_holders"), type = 'error', duration = 3500})
         CloseMenuFull()
     else
-        local options = {}
+        options = {}
 
         for k, _ in pairs(holders) do
             options[#options + 1] = {
@@ -893,7 +893,7 @@ local function getDataForHouseTier(house, coords)
     elseif Config.Houses[house].tier == 100 then
         return exports['qbx-interior']:CreateK4Warehouse(coords)
     else
-        QBCore.Functions.Notify(Lang:t("error.invalid_tier"), 'error')
+        lib.notify({description = Lang:t("error.invalid_tier"), type = 'error'})
     end
 end
 
@@ -1103,7 +1103,7 @@ RegisterNetEvent('qb-houses:client:addGarage', function()
         }
         TriggerServerEvent('qb-houses:server:addGarage', ClosestHouse, coords)
     else
-        QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
+        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
     end
 end)
 
@@ -1114,16 +1114,16 @@ RegisterNetEvent('qb-houses:client:toggleDoorlock', function()
         if HasHouseKey then
             if Config.Houses[ClosestHouse].locked then
                 TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                QBCore.Functions.Notify(Lang:t("success.unlocked"), "success", 2500)
+                lib.notify({description = Lang:t("success.unlocked"), type = 'success', duration = 2500})
             else
                 TriggerServerEvent('qb-houses:server:lockHouse', true, ClosestHouse)
-                QBCore.Functions.Notify(Lang:t("error.locked"), "error", 2500)
+                lib.notify({description = Lang:t("error.locked"), type = 'error', duration = 3500})
             end
         else
-            QBCore.Functions.Notify(Lang:t("error.no_keys"), "error", 3500)
+            lib.notify({description = Lang:t("error.no_keys"), type = 'error', duration = 3500})
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.no_door"), "error", 3500)
+        lib.notify({description = Lang:t("error.no_door"), type = 'error', duration = 3500})
     end
 end)
 
@@ -1131,7 +1131,7 @@ RegisterNetEvent('qb-houses:client:RingDoor', function(player, house)
     if ClosestHouse == house and IsInside then
         CurrentDoorBell = player
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "doorbell", 0.1)
-        QBCore.Functions.Notify(Lang:t("info.door_ringing"))
+        lib.notify({description = Lang:t("info.door_ringing"), type = 'inform'})
     end
 end)
 
@@ -1144,12 +1144,12 @@ RegisterNetEvent('qb-houses:client:giveHouseKey', function()
         if housedist < 10 then
             TriggerServerEvent('qb-houses:server:giveHouseKey', playerId, ClosestHouse)
         else
-            QBCore.Functions.Notify(Lang:t("error.no_door"), "error")
+            lib.notify({description = Lang:t("error.no_door"), type = 'error'})
         end
     elseif ClosestHouse == nil then
-        QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
+        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
     else
-        QBCore.Functions.Notify(Lang:t("error.no_one_near"), "error")
+        lib.notify({description = Lang:t("error.no_one_near"), type = 'error'})
     end
 end)
 
@@ -1162,13 +1162,13 @@ RegisterNetEvent('qb-houses:client:removeHouseKey', function()
             if QBCore.Functions.GetPlayerData().citizenid == result then
                 HouseKeysMenu()
             else
-                QBCore.Functions.Notify(Lang:t("error.not_owner"), "error")
+                lib.notify({description = Lang:t("error.not_owner"), type = 'error'})
             end
         else
-            QBCore.Functions.Notify(Lang:t("error.no_door"), "error")
+            lib.notify({description = Lang:t("error.no_door"), type = 'error'})
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.no_door"), "error")
+        lib.notify({description = Lang:t("error.no_door"), type = 'error'})
     end
 end)
 
@@ -1306,10 +1306,10 @@ RegisterNetEvent('qb-houses:client:setLocation', function(cData)
                 TriggerServerEvent('qb-houses:server:setLocation', coords, ClosestHouse, 3)
             end
         else
-            QBCore.Functions.Notify(Lang:t("error.not_owner"), "error")
+            lib.notify({description = Lang:t("error.not_owner"), type = 'error'})
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.not_in_house"), "error")
+        lib.notify({description = Lang:t("error.not_in_house"), type = 'error'})
     end
 end)
 
@@ -1358,7 +1358,7 @@ RegisterNetEvent('qb-houses:client:HomeInvasion', function()
                         }, function()
                             if RamsDone + 1 >= Config.RamsNeeded then
                                 TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                                QBCore.Functions.Notify(Lang:t("success.home_invasion"), 'success')
+                                lib.notify({description = Lang:t("success.home_invasion"), type = 'success'})
                                 TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
                                 TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
                                 DoRamAnimation(false)
@@ -1374,24 +1374,24 @@ RegisterNetEvent('qb-houses:client:HomeInvasion', function()
                         end, function()
                             RamsDone = 0
                             TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                            QBCore.Functions.Notify(Lang:t("error.failed_invasion"), 'error')
+                            lib.notify({description = Lang:t("error.failed_invasion"), type = 'error'})
                             DoRamAnimation(false)
                         end)
                         TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
                     else
-                        QBCore.Functions.Notify(Lang:t("error.inprogress_invasion"), 'error')
+                        lib.notify({description = Lang:t("error.inprogress_invasion"), type = 'error'})
                     end
                 else
-                    QBCore.Functions.Notify(Lang:t("error.already_open"), 'error')
+                    lib.notify({description = Lang:t("error.already_open"), type = 'error'})
                 end
             else
-                QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
+                lib.notify({description = Lang:t("error.no_house"), type = 'error'})
             end
         else
-            QBCore.Functions.Notify(Lang:t("error.no_police"), 'error')
+            lib.notify({description = Lang:t("error.no_police"), type = 'error'})
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.no_house"), "error")
+        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
     end
 end)
 
@@ -1420,9 +1420,9 @@ RegisterNetEvent('qb-houses:client:ResetHouse', function()
             TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
             TriggerServerEvent('qb-houses:server:lockHouse', true, ClosestHouse)
             RamsDone = 0
-            QBCore.Functions.Notify(Lang:t("success.lock_invasion"), 'success')
+            lib.notify({description = Lang:t("success.lock_invasion"), type = 'success'})
         else
-            QBCore.Functions.Notify(Lang:t("error.no_invasion"), 'error')
+            lib.notify({description = Lang:t("error.no_invasion"), type = 'error'})
         end
     end
 end)
@@ -1447,8 +1447,7 @@ end)
 
 RegisterNetEvent('qb-houses:client:AnswerDoorbell', function()
     if not CurrentDoorBell or CurrentDoorBell == 0 then
-        QBCore.Functions.Notify(Lang:t('error.nobody_at_door'))
-        return
+        return lib.notify({description = Lang:t("error.nobody_at_door"), type = 'error'})
     end
     local door = vector3(Config.Houses[CurrentHouse].coords.enter.x + POIOffsets.exit.x,
         Config.Houses[CurrentHouse].coords.enter.y + POIOffsets.exit.y,
