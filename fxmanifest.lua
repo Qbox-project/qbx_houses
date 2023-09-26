@@ -43,8 +43,6 @@ files {
 }
 
 dependencies {
-    
-    
     'qbx-interior',
     'qbx-weathersync'
 }
