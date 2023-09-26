@@ -1,4 +1,3 @@
-local QBCore = exports['qbx-core']:GetCoreObject()
 local houseowneridentifier = {}
 local houseownercid = {}
 local housekeyholders = {}
@@ -82,7 +81,7 @@ lib.addCommand("createhouse", {
     restricted = 'group.admin'
 }, function(source, args, raw)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBX.Functions.GetPlayer(src)
     if Player.PlayerData.job.name == "realestate" then
         TriggerClientEvent("qb-houses:client:createHouses", src, args.price, args.tier)
     else
@@ -94,7 +93,7 @@ lib.addCommand("addgarage", {
     help = Lang:t('info.add_garage'),
 }, function(source, args, raw)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBX.Functions.GetPlayer(src)
     if Player.PlayerData.job.name == "realestate" then
         TriggerClientEvent("qb-houses:client:addGarage", src)
     else
@@ -111,8 +110,8 @@ end)
 
 -- Item
 
-QBCore.Functions.CreateUseableItem("police_stormram", function(source, _)
-    local Player = QBCore.Functions.GetPlayer(source)
+QBX.Functions.CreateUseableItem("police_stormram", function(source, _)
+    local Player = QBX.Functions.GetPlayer(source)
     if (Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty) then
         TriggerClientEvent("qb-houses:client:HomeInvasion", source)
     else
@@ -222,7 +221,7 @@ end)
 
 RegisterNetEvent('qb-houses:server:viewHouse', function(house)
     local src = source
-    local pData = QBCore.Functions.GetPlayer(src)
+    local pData = QBX.Functions.GetPlayer(src)
 
     local houseprice = Config.Houses[house].price
     local brokerfee = (houseprice / 100 * 5)
@@ -235,7 +234,7 @@ end)
 
 RegisterNetEvent('qb-houses:server:buyHouse', function(house)
     local src = source
-    local pData = QBCore.Functions.GetPlayer(src)
+    local pData = QBX.Functions.GetPlayer(src)
     local price = Config.Houses[house].price
     local HousePrice = math.ceil(price * 1.21)
     local bankBalance = pData.PlayerData.money["bank"]
@@ -276,7 +275,7 @@ RegisterNetEvent('qb-houses:server:SetRamState', function(bool, house)
 end)
 
 RegisterNetEvent('qb-houses:server:giveKey', function(house, target)
-    local pData = QBCore.Functions.GetPlayer(target)
+    local pData = QBX.Functions.GetPlayer(target)
     housekeyholders[house][#housekeyholders[house]+1] = pData.PlayerData.citizenid
     MySQL.update('UPDATE player_houses SET keyholders = ? WHERE house = ?',
         {json.encode(housekeyholders[house]), house})
@@ -298,7 +297,7 @@ RegisterNetEvent('qb-houses:server:removeHouseKey', function(house, citizenData)
 end)
 
 RegisterNetEvent('qb-houses:server:OpenDoor', function(target, house)
-    local OtherPlayer = QBCore.Functions.GetPlayer(target)
+    local OtherPlayer = QBX.Functions.GetPlayer(target)
     if OtherPlayer then
         TriggerClientEvent('qb-houses:client:SpawnInApartment', OtherPlayer.PlayerData.source, house)
     end
@@ -316,17 +315,17 @@ end)
 
 RegisterNetEvent('qb-houses:server:LogoutLocation', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBX.Functions.GetPlayer(src)
     local MyItems = Player.PlayerData.items
     MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?',
         {json.encode(MyItems), Player.PlayerData.citizenid})
-    QBCore.Player.Logout(src)
+    QBX.Player.Logout(src)
     TriggerClientEvent('qb-multicharacter:client:chooseChar', src)
 end)
 
 RegisterNetEvent('qb-houses:server:giveHouseKey', function(target, house)
     local src = source
-    local tPlayer = QBCore.Functions.GetPlayer(target)
+    local tPlayer = QBX.Functions.GetPlayer(target)
     if tPlayer then
         if housekeyholders[house] then
             for _, cid in pairs(housekeyholders[house]) do
@@ -340,7 +339,7 @@ RegisterNetEvent('qb-houses:server:giveHouseKey', function(target, house)
 
             TriggerClientEvent('ox_lib:notify', tPlayer.PlayerData.source, {description = Lang:t("success.recieved_key", {value = Config.Houses[house].adress}), type = 'success', duration = 2500})
         else
-            local sourceTarget = QBCore.Functions.GetPlayer(src)
+            local sourceTarget = QBX.Functions.GetPlayer(src)
             housekeyholders[house] = {
                 [1] = sourceTarget.PlayerData.citizenid
             }
@@ -372,7 +371,7 @@ end)
 
 RegisterNetEvent('qb-houses:server:SetInsideMeta', function(insideId, bool)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBX.Functions.GetPlayer(src)
     local insideMeta = Player.PlayerData.metadata["inside"]
     if bool then
         insideMeta.apartment.apartmentType = nil
@@ -390,7 +389,7 @@ end)
 -- Callbacks
 
 lib.callback.register('qb-houses:server:buyFurniture', function(source, price)
-    local pData = QBCore.Functions.GetPlayer(source)
+    local pData = QBX.Functions.GetPlayer(source)
     local bankBalance = pData.PlayerData.money["bank"]
 
     if bankBalance >= price then
@@ -403,7 +402,7 @@ lib.callback.register('qb-houses:server:buyFurniture', function(source, price)
 end)
 
 lib.callback.register('qb-houses:server:ProximityKO', function(source, house)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     if not Player then return end
 
     local identifier = Player.PlayerData.license
@@ -412,7 +411,7 @@ lib.callback.register('qb-houses:server:ProximityKO', function(source, house)
 end)
 
 lib.callback.register('qb-houses:server:hasKey', function(source, house)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     if not Player then return end
 
     local identifier = Player.PlayerData.license
@@ -421,7 +420,7 @@ lib.callback.register('qb-houses:server:hasKey', function(source, house)
 end)
 
 lib.callback.register('qb-houses:server:isOwned', function(source, house)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     return Player and Player.PlayerData and Player.PlayerData.job and Player.PlayerData.job.name == "realestate" or houseowneridentifier[house] and houseownercid[house]
 end)
 
@@ -431,7 +430,7 @@ end)
 
 lib.callback.register('qb-houses:server:getHouseKeyHolders', function(source, house)
     local retval = {}
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     if housekeyholders[house] then
         for i = 1, #housekeyholders[house], 1 do
             if Player.PlayerData.citizenid ~= housekeyholders[house][i] then
@@ -482,7 +481,7 @@ lib.callback.register('qb-houses:server:getHouseLocations', function(_, house)
 end)
 
 lib.callback.register('qb-houses:server:getOwnedHouses', function(source)
-    local pData = QBCore.Functions.GetPlayer(source)
+    local pData = QBX.Functions.GetPlayer(source)
     if not pData then return end
     local houses = MySQL.query.await('SELECT * FROM player_houses WHERE identifier = ? AND citizenid = ?', {pData.PlayerData.license, pData.PlayerData.citizenid})
     if houses then
@@ -495,7 +494,7 @@ lib.callback.register('qb-houses:server:getOwnedHouses', function(source)
 end)
 
 lib.callback.register('qb-houses:server:getSavedOutfits', function(source)
-    local pData = QBCore.Functions.GetPlayer(source)
+    local pData = QBX.Functions.GetPlayer(source)
 
     if pData then
         local result = MySQL.query.await('SELECT * FROM player_outfits WHERE citizenid = ?', {pData.PlayerData.citizenid})
@@ -504,7 +503,7 @@ lib.callback.register('qb-houses:server:getSavedOutfits', function(source)
 end)
 
 lib.callback.register('qb-phone:server:GetPlayerHouses', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     local MyHouses = {}
     local result = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?', {Player.PlayerData.citizenid})
     if result and result[1] then
@@ -568,7 +567,7 @@ lib.callback.register('qb-phone:server:GetPlayerHouses', function(source)
 end)
 
 lib.callback.register('qb-phone:server:GetHouseKeys', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBX.Functions.GetPlayer(source)
     local MyKeys = {}
 
     local result = MySQL.query.await('SELECT * FROM player_houses', {})

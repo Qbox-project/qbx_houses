@@ -1,4 +1,3 @@
-QBCore = exports['qbx-core']:GetCoreObject()
 IsInside = false
 ClosestHouse = nil
 HasHouseKey = false
@@ -41,7 +40,7 @@ local isInsiteCharactersTarget = false
 local function showEntranceHeaderMenu()
     local options = {}
 
-    if QBCore.Functions.GetPlayerData().job and QBCore.Functions.GetPlayerData().job.name == 'realestate' then
+    if QBX.PlayerData.job and QBX.PlayerData.job.name == 'realestate' then
         isOwned = true
     end
 
@@ -72,7 +71,7 @@ local function showEntranceHeaderMenu()
                 event = "qb-houses:client:EnterHouse",
             }
 
-            if QBCore.Functions.GetPlayerData().job and QBCore.Functions.GetPlayerData().job.type == 'leo' then
+            if QBX.PlayerData.job and QBX.PlayerData.job.type == 'leo' then
                 options[#options + 1] = {
                     title = Lang:t("menu.lock_door_police"),
                     event = "qb-houses:client:ResetHouse",
@@ -316,7 +315,7 @@ local function openContract(bool)
 end
 
 local function GetClosestPlayer()
-    local closestPlayers = QBCore.Functions.GetPlayersFromCoords()
+    local closestPlayers = QBX.Functions.GetPlayersFromCoords()
     local closestDistance = -1
     local closestPlayer = -1
     local coords = GetEntityCoords(cache.ped)
@@ -1159,7 +1158,7 @@ RegisterNetEvent('qb-houses:client:removeHouseKey', function()
         local housedist = #(pedpos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
         if housedist <= 5 then
             local result = lib.callback.await('qb-houses:server:getHouseOwner', false, ClosestHouse)
-            if QBCore.Functions.GetPlayerData().citizenid == result then
+            if QBX.PlayerData.citizenid == result then
                 HouseKeysMenu()
             else
                 lib.notify({description = Lang:t("error.not_owner"), type = 'error'})
@@ -1193,19 +1192,15 @@ RegisterNetEvent('qb-houses:client:SpawnInApartment', function(house)
 end)
 
 RegisterNetEvent('qb-houses:client:enterOwnedHouse', function(house)
-    QBCore.Functions.GetPlayerData(function(PlayerData)
-        if PlayerData.metadata["injail"] == 0 then
-            enterOwnedHouse(house)
-        end
-    end)
+    if QBX.PlayerData.metadata["injail"] == 0 then
+        enterOwnedHouse(house)
+    end
 end)
 
 RegisterNetEvent('qb-houses:client:LastLocationHouse', function(houseId)
-    QBCore.Functions.GetPlayerData(function(PlayerData)
-        if PlayerData.metadata["injail"] == 0 then
-            enterOwnedHouse(houseId)
-        end
-    end)
+    if QBX.PlayerData.metadata["injail"] == 0 then
+        enterOwnedHouse(houseId)
+    end
 end)
 
 RegisterNetEvent('qb-houses:client:setupHouseBlips', function() -- Setup owned on load
