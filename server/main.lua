@@ -81,11 +81,11 @@ lib.addCommand("createhouse", {
     restricted = 'group.admin'
 }, function(source, args, raw)
     local src = source
-    local Player = QBX.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     if Player.PlayerData.job.name == "realestate" then
         TriggerClientEvent("qb-houses:client:createHouses", src, args.price, args.tier)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t('error.realestate_only'), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t('error.realestate_only'), 'error')
     end
 end)
 
@@ -93,11 +93,11 @@ lib.addCommand("addgarage", {
     help = Lang:t('info.add_garage'),
 }, function(source, args, raw)
     local src = source
-    local Player = QBX.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     if Player.PlayerData.job.name == "realestate" then
         TriggerClientEvent("qb-houses:client:addGarage", src)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t('error.realestate_only'), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t('error.realestate_only'), 'error')
     end
 end)
 
@@ -110,12 +110,12 @@ end)
 
 -- Item
 
-QBX.Functions.CreateUseableItem("police_stormram", function(source, _)
-    local Player = QBX.Functions.GetPlayer(source)
+exports.qbx_core:CreateUseableItem("police_stormram", function(source, _)
+    local Player = exports.qbx_core:GetPlayer(source)
     if (Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty) then
         TriggerClientEvent("qb-houses:client:HomeInvasion", source)
     else
-        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t('error.emergency_services'), type = 'error'})
+        exports.qbx_core:Notify(source, Lang:t('error.emergency_services'), 'error')
     end
 end)
 
@@ -204,7 +204,7 @@ RegisterNetEvent('qb-houses:server:addNewHouse', function(street, coords, price,
         decorations = {}
     }
     TriggerClientEvent("qb-houses:client:setHouseConfig", -1, Config.Houses)
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.added_house", {value = label}), type = 'success'})
+    exports.qbx_core:Notify(src, Lang:t("info.added_house", {value = label}), 'success')
     TriggerEvent('qb-log:server:CreateLog', 'house', Lang:t("log.house_created"), 'green', Lang:t("log.house_address", {label = label, price = price, tier = tier, agent = GetPlayerName(src)}))
 end)
 
@@ -216,12 +216,12 @@ RegisterNetEvent('qb-houses:server:addGarage', function(house, coords)
         takeVehicle = coords
     }
     TriggerClientEvent("qb-garages:client:addHouseGarage", -1, house, garageInfo)
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.added_garage", {value = garageInfo.label}), type = 'success'})
+    exports.qbx_core:Notify(src, Lang:t("info.added_garage", {value = garageInfo.label}), 'success')
 end)
 
 RegisterNetEvent('qb-houses:server:viewHouse', function(house)
     local src = source
-    local pData = QBX.Functions.GetPlayer(src)
+    local pData = exports.qbx_core:GetPlayer(src)
 
     local houseprice = Config.Houses[house].price
     local brokerfee = (houseprice / 100 * 5)
@@ -234,14 +234,14 @@ end)
 
 RegisterNetEvent('qb-houses:server:buyHouse', function(house)
     local src = source
-    local pData = QBX.Functions.GetPlayer(src)
+    local pData = exports.qbx_core:GetPlayer(src)
     local price = Config.Houses[house].price
     local HousePrice = math.ceil(price * 1.21)
     local bankBalance = pData.PlayerData.money["bank"]
 
     local isOwned = isHouseOwned(house)
     if isOwned then
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.already_owned"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.already_owned"), 'error')
         CancelEvent()
         return
     end
@@ -257,11 +257,11 @@ RegisterNetEvent('qb-houses:server:buyHouse', function(house)
         TriggerClientEvent('qb-houses:client:SetClosestHouse', src)
         TriggerClientEvent('qb-house:client:RefreshHouseTargets', src)
         pData.Functions.RemoveMoney('bank', HousePrice, "bought-house") -- 21% Extra house costs
-        exports['qbx-management']:AddMoney("realestate", (HousePrice / 100) * math.random(18, 25))
+        exports['qbx_management']:AddMoney("realestate", (HousePrice / 100) * math.random(18, 25))
         TriggerEvent('qb-log:server:CreateLog', 'house', Lang:t("log.house_purchased"), 'green', Lang:t("log.house_purchased_by", {house = house:upper(), price = HousePrice, firstname = pData.PlayerData.charinfo.firstname, lastname = pData.PlayerData.charinfo.lastname}))
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.house_purchased"), type = 'success', duration = 5000})
+        exports.qbx_core:Notify(src, Lang:t("success.house_purchased"), 'success', 5000)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_enough_money"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.not_enough_money"), 'error')
     end
 end)
 
@@ -275,7 +275,7 @@ RegisterNetEvent('qb-houses:server:SetRamState', function(bool, house)
 end)
 
 RegisterNetEvent('qb-houses:server:giveKey', function(house, target)
-    local pData = QBX.Functions.GetPlayer(target)
+    local pData = exports.qbx_core:GetPlayer(target)
     housekeyholders[house][#housekeyholders[house]+1] = pData.PlayerData.citizenid
     MySQL.update('UPDATE player_houses SET keyholders = ? WHERE house = ?',
         {json.encode(housekeyholders[house]), house})
@@ -292,12 +292,12 @@ RegisterNetEvent('qb-houses:server:removeHouseKey', function(house, citizenData)
         end
     end
     housekeyholders[house] = newHolders
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.remove_key_from", {firstname = citizenData.firstname, lastname = citizenData.lastname}), type = 'error'})
+    exports.qbx_core:Notify(src, Lang:t("error.remove_key_from", {firstname = citizenData.firstname, lastname = citizenData.lastname}), 'error')
     MySQL.update('UPDATE player_houses SET keyholders = ? WHERE house = ?', {json.encode(housekeyholders[house]), house})
 end)
 
 RegisterNetEvent('qb-houses:server:OpenDoor', function(target, house)
-    local OtherPlayer = QBX.Functions.GetPlayer(target)
+    local OtherPlayer = exports.qbx_core:GetPlayer(target)
     if OtherPlayer then
         TriggerClientEvent('qb-houses:client:SpawnInApartment', OtherPlayer.PlayerData.source, house)
     end
@@ -315,41 +315,40 @@ end)
 
 RegisterNetEvent('qb-houses:server:LogoutLocation', function()
     local src = source
-    local Player = QBX.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     local MyItems = Player.PlayerData.items
     MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?',
         {json.encode(MyItems), Player.PlayerData.citizenid})
-    QBX.Player.Logout(src)
+        exports.qbx_core:Logout(src)
     TriggerClientEvent('qb-multicharacter:client:chooseChar', src)
 end)
 
 RegisterNetEvent('qb-houses:server:giveHouseKey', function(target, house)
     local src = source
-    local tPlayer = QBX.Functions.GetPlayer(target)
+    local tPlayer = exports.qbx_core:GetPlayer(target)
     if tPlayer then
         if housekeyholders[house] then
             for _, cid in pairs(housekeyholders[house]) do
                 if cid == tPlayer.PlayerData.citizenid then
-                    return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.already_keys"), type = 'error', duration = 3500})
+                    return exports.qbx_core:Notify(src, Lang:t("error.already_keys"), 'error', 5000)
                 end
             end
             housekeyholders[house][#housekeyholders[house]+1] = tPlayer.PlayerData.citizenid
             MySQL.update('UPDATE player_houses SET keyholders = ? WHERE house = ?', {json.encode(housekeyholders[house]), house})
             TriggerClientEvent('qb-houses:client:refreshHouse', tPlayer.PlayerData.source)
-
-            TriggerClientEvent('ox_lib:notify', tPlayer.PlayerData.source, {description = Lang:t("success.recieved_key", {value = Config.Houses[house].adress}), type = 'success', duration = 2500})
+            exports.qbx_core:Notify(tPlayer.PlayerData.source, Lang:t("success.recieved_key", {value = Config.Houses[house].adress}), 'success', 2500)
         else
-            local sourceTarget = QBX.Functions.GetPlayer(src)
+            local sourceTarget = exports.qbx_core:GetPlayer(src)
             housekeyholders[house] = {
                 [1] = sourceTarget.PlayerData.citizenid
             }
             housekeyholders[house][#housekeyholders[house]+1] = tPlayer.PlayerData.citizenid
             MySQL.update('UPDATE player_houses SET keyholders = ? WHERE house = ?', {json.encode(housekeyholders[house]), house})
             TriggerClientEvent('qb-houses:client:refreshHouse', tPlayer.PlayerData.source)
-            TriggerClientEvent('ox_lib:notify', tPlayer.PlayerData.source, {description = Lang:t("success.recieved_key", {value = Config.Houses[house].adress}), type = 'success', duration = 2500})
+            exports.qbx_core:Notify(tPlayer.PlayerData.source, Lang:t("success.recieved_key", {value = Config.Houses[house].adress}), 'success', 2500)
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.something_wrong"), type = 'error', duration = 2500})
+        exports.qbx_core:Notify(src, Lang:t("error.something_wrong"), 'error', 2500)
     end
 end)
 
@@ -371,7 +370,7 @@ end)
 
 RegisterNetEvent('qb-houses:server:SetInsideMeta', function(insideId, bool)
     local src = source
-    local Player = QBX.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     local insideMeta = Player.PlayerData.metadata["inside"]
     if bool then
         insideMeta.apartment.apartmentType = nil
@@ -389,7 +388,7 @@ end)
 -- Callbacks
 
 lib.callback.register('qb-houses:server:buyFurniture', function(source, price)
-    local pData = QBX.Functions.GetPlayer(source)
+    local pData = exports.qbx_core:GetPlayer(source)
     local bankBalance = pData.PlayerData.money["bank"]
 
     if bankBalance >= price then
@@ -397,12 +396,12 @@ lib.callback.register('qb-houses:server:buyFurniture', function(source, price)
         return true
     end
 
-    TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.not_enough_money"), type = 'error'})
+    exports.qbx_core:Notify(source, Lang:t("error.not_enough_money"), 'error')
     return false
 end)
 
 lib.callback.register('qb-houses:server:ProximityKO', function(source, house)
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     if not Player then return end
 
     local identifier = Player.PlayerData.license
@@ -411,7 +410,7 @@ lib.callback.register('qb-houses:server:ProximityKO', function(source, house)
 end)
 
 lib.callback.register('qb-houses:server:hasKey', function(source, house)
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     if not Player then return end
 
     local identifier = Player.PlayerData.license
@@ -420,7 +419,7 @@ lib.callback.register('qb-houses:server:hasKey', function(source, house)
 end)
 
 lib.callback.register('qb-houses:server:isOwned', function(source, house)
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     return Player and Player.PlayerData and Player.PlayerData.job and Player.PlayerData.job.name == "realestate" or houseowneridentifier[house] and houseownercid[house]
 end)
 
@@ -430,7 +429,7 @@ end)
 
 lib.callback.register('qb-houses:server:getHouseKeyHolders', function(source, house)
     local retval = {}
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     if housekeyholders[house] then
         for i = 1, #housekeyholders[house], 1 do
             if Player.PlayerData.citizenid ~= housekeyholders[house][i] then
@@ -481,7 +480,7 @@ lib.callback.register('qb-houses:server:getHouseLocations', function(_, house)
 end)
 
 lib.callback.register('qb-houses:server:getOwnedHouses', function(source)
-    local pData = QBX.Functions.GetPlayer(source)
+    local pData = exports.qbx_core:GetPlayer(source)
     if not pData then return end
     local houses = MySQL.query.await('SELECT * FROM player_houses WHERE identifier = ? AND citizenid = ?', {pData.PlayerData.license, pData.PlayerData.citizenid})
     if houses then
@@ -494,7 +493,7 @@ lib.callback.register('qb-houses:server:getOwnedHouses', function(source)
 end)
 
 lib.callback.register('qb-houses:server:getSavedOutfits', function(source)
-    local pData = QBX.Functions.GetPlayer(source)
+    local pData = exports.qbx_core:GetPlayer(source)
 
     if pData then
         local result = MySQL.query.await('SELECT * FROM player_outfits WHERE citizenid = ?', {pData.PlayerData.citizenid})
@@ -503,7 +502,7 @@ lib.callback.register('qb-houses:server:getSavedOutfits', function(source)
 end)
 
 lib.callback.register('qb-phone:server:GetPlayerHouses', function(source)
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     local MyHouses = {}
     local result = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?', {Player.PlayerData.citizenid})
     if result and result[1] then
@@ -567,7 +566,7 @@ lib.callback.register('qb-phone:server:GetPlayerHouses', function(source)
 end)
 
 lib.callback.register('qb-phone:server:GetHouseKeys', function(source)
-    local Player = QBX.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     local MyKeys = {}
 
     local result = MySQL.query.await('SELECT * FROM player_houses', {})

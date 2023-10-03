@@ -191,7 +191,7 @@ local function CheckMovementInput()
 		if curSpeed > getTableLength(speeds) then
 			curSpeed = 1
 		end
-		lib.notify({description = Lang:t("info.speed").. tostring(speeds[curSpeed]), type = 'inform'})
+		exports.qbx_core:Notify(Lang:t("info.speed").. tostring(speeds[curSpeed]), 'inform')
 	end
 
 	local xVect = speeds[curSpeed] * math.sin( degToRad( rotation.z ) ) * -1.0
@@ -224,10 +224,10 @@ RegisterNetEvent('qb-houses:client:decorate', function()
 				openDecorateUI()
 			end
 		else
-			lib.notify({description = Lang:t("error.no_keys"), type = 'error'})
+			exports.qbx_core:Notify(Lang:t("error.no_keys"), 'error')
 		end
 	else
-		lib.notify({description = Lang:t("error.not_in_house"), type = 'error'})
+		exports.qbx_core:Notify(Lang:t("error.not_in_house"), 'error')
 	end
 end)
 
@@ -499,7 +499,7 @@ CreateThread(function()
 			if dist > 50.0 then
 				DisableEditMode()
 				closeDecorateUI()
-				lib.notify({description = Lang:t("error.out_range"), type = 'error'})
+				exports.qbx_core:Notify(Lang:t("error.out_range"), 'error')
 			end
 		end
 	end

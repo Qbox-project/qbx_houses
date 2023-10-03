@@ -9,7 +9,7 @@ ui_page 'html/index.html'
 shared_scripts {
     '@ox_lib/init.lua',
     'config.lua',
-    '@qb-core/shared/locale.lua',
+    '@qbx_core/shared/locale.lua',
     '@qbx_core/import.lua',
     'locales/en.lua',
     'locales/*.lua'
@@ -43,8 +43,8 @@ files {
 }
 
 dependencies {
-    'qbx-interior',
-    'qbx-weathersync'
+    'qbx_interior',
+    'qbx_weathersync'
 }
 
 provide 'qb-houses'
