@@ -134,9 +134,9 @@ local function RegisterStashTarget()
 
     stashTargetBox:onPlayerInOut(function(isPointInside)
         if isPointInside and not entering and isOwned then
-            exports['qbx-core']:DrawText(Lang:t("target.open_stash"), 'left')
+            exports['qbx_core']:DrawText(Lang:t("target.open_stash"), 'left')
         else
-            exports['qbx-core']:HideText()
+            exports['qbx_core']:HideText()
         end
 
         isInsideStashTarget = isPointInside
@@ -158,9 +158,9 @@ local function RegisterOutfitsTarget()
 
     outfitsTargetBox:onPlayerInOut(function(isPointInside)
         if isPointInside and not entering and isOwned then
-            exports['qbx-core']:DrawText(Lang:t("target.outfits"), 'left')
+            exports['qbx_core']:DrawText(Lang:t("target.outfits"), 'left')
         else
-            exports['qbx-core']:HideText()
+            exports['qbx_core']:HideText()
         end
 
         isInsideOutfitsTarget = isPointInside
@@ -182,9 +182,9 @@ local function RegisterCharactersTarget()
 
     charactersTargetBox:onPlayerInOut(function(isPointInside)
         if isPointInside and not entering and isOwned then
-            exports['qbx-core']:DrawText(Lang:t("target.change_character"), 'left')
+            exports['qbx_core']:DrawText(Lang:t("target.change_character"), 'left')
         else
-            exports['qbx-core']:HideText()
+            exports['qbx_core']:HideText()
         end
 
         isInsiteCharactersTarget = isPointInside
@@ -641,7 +641,7 @@ function HouseKeysMenu()
     fetchingHouseKeys = false
 
     if holders == nil or next(holders) == nil then
-        lib.notify({description = Lang:t("error.no_key_holders"), type = 'error', duration = 3500})
+        exports.qbx_core:Notify(Lang:t("error.no_key_holders"), 'error', 3500)
         CloseMenuFull()
     else
         options = {}
@@ -692,207 +692,207 @@ end
 
 local function getDataForHouseTier(house, coords)
     if Config.Houses[house].tier == 1 then
-        return exports['qbx-interior']:CreateApartmentShell(coords)
+        return exports['qbx_interior']:CreateApartmentShell(coords)
     elseif Config.Houses[house].tier == 2 then
-        return exports['qbx-interior']:CreateTier1House(coords)
+        return exports['qbx_interior']:CreateTier1House(coords)
     elseif Config.Houses[house].tier == 3 then
-        return exports['qbx-interior']:CreateTrevorsShell(coords)
+        return exports['qbx_interior']:CreateTrevorsShell(coords)
     elseif Config.Houses[house].tier == 4 then
-        return exports['qbx-interior']:CreateCaravanShell(coords)
+        return exports['qbx_interior']:CreateCaravanShell(coords)
     elseif Config.Houses[house].tier == 5 then
-        return exports['qbx-interior']:CreateLesterShell(coords)
+        return exports['qbx_interior']:CreateLesterShell(coords)
     elseif Config.Houses[house].tier == 6 then
-        return exports['qbx-interior']:CreateRanchShell(coords)
+        return exports['qbx_interior']:CreateRanchShell(coords)
     elseif Config.Houses[house].tier == 7 then
-        return exports['qbx-interior']:CreateContainer(coords)
+        return exports['qbx_interior']:CreateContainer(coords)
     elseif Config.Houses[house].tier == 8 then
-        return exports['qbx-interior']:CreateFurniMid(coords)
+        return exports['qbx_interior']:CreateFurniMid(coords)
     elseif Config.Houses[house].tier == 9 then
-        return exports['qbx-interior']:CreateFurniMotelModern(coords)
+        return exports['qbx_interior']:CreateFurniMotelModern(coords)
     elseif Config.Houses[house].tier == 10 then
-        return exports['qbx-interior']:CreateFranklinAunt(coords)
+        return exports['qbx_interior']:CreateFranklinAunt(coords)
     elseif Config.Houses[house].tier == 11 then
-        return exports['qbx-interior']:CreateGarageMed(coords)
+        return exports['qbx_interior']:CreateGarageMed(coords)
     elseif Config.Houses[house].tier == 12 then
-        return exports['qbx-interior']:CreateMichael(coords)
+        return exports['qbx_interior']:CreateMichael(coords)
     elseif Config.Houses[house].tier == 13 then
-        return exports['qbx-interior']:CreateOffice1(coords)
+        return exports['qbx_interior']:CreateOffice1(coords)
     elseif Config.Houses[house].tier == 14 then
-        return exports['qbx-interior']:CreateStore1(coords)
+        return exports['qbx_interior']:CreateStore1(coords)
     elseif Config.Houses[house].tier == 15 then
-        return exports['qbx-interior']:CreateWarehouse1(coords)
+        return exports['qbx_interior']:CreateWarehouse1(coords)
     elseif Config.Houses[house].tier == 16 then
-        return exports['qbx-interior']:CreateFurniMotelStandard(coords) -- End of free shells
+        return exports['qbx_interior']:CreateFurniMotelStandard(coords) -- End of free shells
     elseif Config.Houses[house].tier == 17 then
-        return exports['qbx-interior']:CreateMedium2(coords)
+        return exports['qbx_interior']:CreateMedium2(coords)
     elseif Config.Houses[house].tier == 18 then
-        return exports['qbx-interior']:CreateMedium3(coords)
+        return exports['qbx_interior']:CreateMedium3(coords)
     elseif Config.Houses[house].tier == 19 then
-        return exports['qbx-interior']:CreateBanham(coords)
+        return exports['qbx_interior']:CreateBanham(coords)
     elseif Config.Houses[house].tier == 20 then
-        return exports['qbx-interior']:CreateWestons(coords)
+        return exports['qbx_interior']:CreateWestons(coords)
     elseif Config.Houses[house].tier == 21 then
-        return exports['qbx-interior']:CreateWestons2(coords)
+        return exports['qbx_interior']:CreateWestons2(coords)
     elseif Config.Houses[house].tier == 22 then
-        return exports['qbx-interior']:CreateClassicHouse(coords)
+        return exports['qbx_interior']:CreateClassicHouse(coords)
     elseif Config.Houses[house].tier == 23 then
-        return exports['qbx-interior']:CreateClassicHouse2(coords)
+        return exports['qbx_interior']:CreateClassicHouse2(coords)
     elseif Config.Houses[house].tier == 24 then
-        return exports['qbx-interior']:CreateClassicHouse3(coords)
+        return exports['qbx_interior']:CreateClassicHouse3(coords)
     elseif Config.Houses[house].tier == 25 then
-        return exports['qbx-interior']:CreateHighend1(coords)
+        return exports['qbx_interior']:CreateHighend1(coords)
     elseif Config.Houses[house].tier == 26 then
-        return exports['qbx-interior']:CreateHighend2(coords)
+        return exports['qbx_interior']:CreateHighend2(coords)
     elseif Config.Houses[house].tier == 27 then
-        return exports['qbx-interior']:CreateHighend3(coords)
+        return exports['qbx_interior']:CreateHighend3(coords)
     elseif Config.Houses[house].tier == 28 then
-        return exports['qbx-interior']:CreateHighend(coords)
+        return exports['qbx_interior']:CreateHighend(coords)
     elseif Config.Houses[house].tier == 29 then
-        return exports['qbx-interior']:CreateHighendV2(coords)
+        return exports['qbx_interior']:CreateHighendV2(coords)
     elseif Config.Houses[house].tier == 30 then
-        return exports['qbx-interior']:CreateStashHouse(coords)
+        return exports['qbx_interior']:CreateStashHouse(coords)
     elseif Config.Houses[house].tier == 31 then
-        return exports['qbx-interior']:CreateStashHouse2(coords)
+        return exports['qbx_interior']:CreateStashHouse2(coords)
     elseif Config.Houses[house].tier == 32 then
-        return exports['qbx-interior']:CreateGarageLow(coords)
+        return exports['qbx_interior']:CreateGarageLow(coords)
     elseif Config.Houses[house].tier == 33 then
-        return exports['qbx-interior']:CreateGarageHigh(coords)
+        return exports['qbx_interior']:CreateGarageHigh(coords)
     elseif Config.Houses[house].tier == 34 then
-        return exports['qbx-interior']:CreateOffice2(coords)
+        return exports['qbx_interior']:CreateOffice2(coords)
     elseif Config.Houses[house].tier == 35 then
-        return exports['qbx-interior']:CreateOfficeBig(coords)
+        return exports['qbx_interior']:CreateOfficeBig(coords)
     elseif Config.Houses[house].tier == 36 then
-        return exports['qbx-interior']:CreateBarber(coords)
+        return exports['qbx_interior']:CreateBarber(coords)
     elseif Config.Houses[house].tier == 37 then
-        return exports['qbx-interior']:CreateGunstore(coords)
+        return exports['qbx_interior']:CreateGunstore(coords)
     elseif Config.Houses[house].tier == 38 then
-        return exports['qbx-interior']:CreateStore2(coords)
+        return exports['qbx_interior']:CreateStore2(coords)
     elseif Config.Houses[house].tier == 39 then
-        return exports['qbx-interior']:CreateStore3(coords)
+        return exports['qbx_interior']:CreateStore3(coords)
     elseif Config.Houses[house].tier == 40 then
-        return exports['qbx-interior']:CreateWarehouse2(coords)
+        return exports['qbx_interior']:CreateWarehouse2(coords)
     elseif Config.Houses[house].tier == 41 then
-        return exports['qbx-interior']:CreateWarehouse3(coords)
+        return exports['qbx_interior']:CreateWarehouse3(coords)
     elseif Config.Houses[house].tier == 42 then
-        return exports['qbx-interior']:CreateK4Coke(coords)
+        return exports['qbx_interior']:CreateK4Coke(coords)
     elseif Config.Houses[house].tier == 43 then
-        return exports['qbx-interior']:CreateK4Meth(coords)
+        return exports['qbx_interior']:CreateK4Meth(coords)
     elseif Config.Houses[house].tier == 44 then
-        return exports['qbx-interior']:CreateK4Weed(coords)
+        return exports['qbx_interior']:CreateK4Weed(coords)
     elseif Config.Houses[house].tier == 45 then
-        return exports['qbx-interior']:CreateContainer2(coords)
+        return exports['qbx_interior']:CreateContainer2(coords)
     elseif Config.Houses[house].tier == 46 then
-        return exports['qbx-interior']:CreateFurniStash1(coords)
+        return exports['qbx_interior']:CreateFurniStash1(coords)
     elseif Config.Houses[house].tier == 47 then
-        return exports['qbx-interior']:CreateFurniStash3(coords)
+        return exports['qbx_interior']:CreateFurniStash3(coords)
     elseif Config.Houses[house].tier == 48 then
-        return exports['qbx-interior']:CreateFurniLow(coords)
+        return exports['qbx_interior']:CreateFurniLow(coords)
     elseif Config.Houses[house].tier == 49 then
-        return exports['qbx-interior']:CreateFurniMotel(coords)
+        return exports['qbx_interior']:CreateFurniMotel(coords)
     elseif Config.Houses[house].tier == 50 then
-        return exports['qbx-interior']:CreateFurniMotelClassic(coords)
+        return exports['qbx_interior']:CreateFurniMotelClassic(coords)
     elseif Config.Houses[house].tier == 51 then
-        return exports['qbx-interior']:CreateFurniMotelHigh(coords)
+        return exports['qbx_interior']:CreateFurniMotelHigh(coords)
     elseif Config.Houses[house].tier == 52 then
-        return exports['qbx-interior']:CreateFurniMotelModern2(coords)
+        return exports['qbx_interior']:CreateFurniMotelModern2(coords)
     elseif Config.Houses[house].tier == 53 then
-        return exports['qbx-interior']:CreateFurniMotelModern3(coords)
+        return exports['qbx_interior']:CreateFurniMotelModern3(coords)
     elseif Config.Houses[house].tier == 54 then
-        return exports['qbx-interior']:CreateCoke(coords)
+        return exports['qbx_interior']:CreateCoke(coords)
     elseif Config.Houses[house].tier == 55 then
-        return exports['qbx-interior']:CreateCoke2(coords)
+        return exports['qbx_interior']:CreateCoke2(coords)
     elseif Config.Houses[house].tier == 56 then
-        return exports['qbx-interior']:CreateMeth(coords)
+        return exports['qbx_interior']:CreateMeth(coords)
     elseif Config.Houses[house].tier == 57 then
-        return exports['qbx-interior']:CreateWeed(coords)
+        return exports['qbx_interior']:CreateWeed(coords)
     elseif Config.Houses[house].tier == 58 then
-        return exports['qbx-interior']:CreateWeed2(coords)
+        return exports['qbx_interior']:CreateWeed2(coords)
     elseif Config.Houses[house].tier == 59 then
-        return exports['qbx-interior']:CreateMansion(coords)
+        return exports['qbx_interior']:CreateMansion(coords)
     elseif Config.Houses[house].tier == 60 then
-        return exports['qbx-interior']:CreateMansion2(coords)
+        return exports['qbx_interior']:CreateMansion2(coords)
     elseif Config.Houses[house].tier == 61 then
-        return exports['qbx-interior']:CreateMansion3(coords)
+        return exports['qbx_interior']:CreateMansion3(coords)
     elseif Config.Houses[house].tier == 62 then
-        return exports['qbx-interior']:CreateHotel1(coords)
+        return exports['qbx_interior']:CreateHotel1(coords)
     elseif Config.Houses[house].tier == 63 then
-        return exports['qbx-interior']:CreateHotel2(coords)
+        return exports['qbx_interior']:CreateHotel2(coords)
     elseif Config.Houses[house].tier == 64 then
-        return exports['qbx-interior']:CreateHotel3(coords)
+        return exports['qbx_interior']:CreateHotel3(coords)
     elseif Config.Houses[house].tier == 65 then
-        return exports['qbx-interior']:CreateMotel1(coords)
+        return exports['qbx_interior']:CreateMotel1(coords)
     elseif Config.Houses[house].tier == 66 then
-        return exports['qbx-interior']:CreateMotel2(coords)
+        return exports['qbx_interior']:CreateMotel2(coords)
     elseif Config.Houses[house].tier == 67 then
-        return exports['qbx-interior']:CreateMotel3(coords)
+        return exports['qbx_interior']:CreateMotel3(coords)
     elseif Config.Houses[house].tier == 68 then
-        return exports['qbx-interior']:CreateV2Default1(coords)
+        return exports['qbx_interior']:CreateV2Default1(coords)
     elseif Config.Houses[house].tier == 69 then
-        return exports['qbx-interior']:CreateV2Default2(coords)
+        return exports['qbx_interior']:CreateV2Default2(coords)
     elseif Config.Houses[house].tier == 70 then
-        return exports['qbx-interior']:CreateV2Default3(coords)
+        return exports['qbx_interior']:CreateV2Default3(coords)
     elseif Config.Houses[house].tier == 71 then
-        return exports['qbx-interior']:CreateV2Default4(coords)
+        return exports['qbx_interior']:CreateV2Default4(coords)
     elseif Config.Houses[house].tier == 72 then
-        return exports['qbx-interior']:CreateV2Default5(coords)
+        return exports['qbx_interior']:CreateV2Default5(coords)
     elseif Config.Houses[house].tier == 73 then
-        return exports['qbx-interior']:CreateV2Default6(coords)
+        return exports['qbx_interior']:CreateV2Default6(coords)
     elseif Config.Houses[house].tier == 74 then
-        return exports['qbx-interior']:CreateV2Deluxe1(coords)
+        return exports['qbx_interior']:CreateV2Deluxe1(coords)
     elseif Config.Houses[house].tier == 75 then
-        return exports['qbx-interior']:CreateV2Deluxe2(coords)
+        return exports['qbx_interior']:CreateV2Deluxe2(coords)
     elseif Config.Houses[house].tier == 76 then
-        return exports['qbx-interior']:CreateV2Deluxe3(coords)
+        return exports['qbx_interior']:CreateV2Deluxe3(coords)
     elseif Config.Houses[house].tier == 77 then
-        return exports['qbx-interior']:CreateV2HighEnd1(coords)
+        return exports['qbx_interior']:CreateV2HighEnd1(coords)
     elseif Config.Houses[house].tier == 78 then
-        return exports['qbx-interior']:CreateV2HighEnd2(coords)
+        return exports['qbx_interior']:CreateV2HighEnd2(coords)
     elseif Config.Houses[house].tier == 79 then
-        return exports['qbx-interior']:CreateV2HighEnd3(coords)
+        return exports['qbx_interior']:CreateV2HighEnd3(coords)
     elseif Config.Houses[house].tier == 80 then
-        return exports['qbx-interior']:CreateV2Medium1(coords)
+        return exports['qbx_interior']:CreateV2Medium1(coords)
     elseif Config.Houses[house].tier == 81 then
-        return exports['qbx-interior']:CreateV2Medium2(coords)
+        return exports['qbx_interior']:CreateV2Medium2(coords)
     elseif Config.Houses[house].tier == 82 then
-        return exports['qbx-interior']:CreateV2Medium3(coords)
+        return exports['qbx_interior']:CreateV2Medium3(coords)
     elseif Config.Houses[house].tier == 83 then
-        return exports['qbx-interior']:CreateV2Modern1(coords)
+        return exports['qbx_interior']:CreateV2Modern1(coords)
     elseif Config.Houses[house].tier == 84 then
-        return exports['qbx-interior']:CreateV2Modern2(coords)
+        return exports['qbx_interior']:CreateV2Modern2(coords)
     elseif Config.Houses[house].tier == 85 then
-        return exports['qbx-interior']:CreateV2Modern3(coords)
+        return exports['qbx_interior']:CreateV2Modern3(coords)
     elseif Config.Houses[house].tier == 86 then
-        return exports['qbx-interior']:VineWoodHouse1(coords)
+        return exports['qbx_interior']:VineWoodHouse1(coords)
     elseif Config.Houses[house].tier == 87 then
-        return exports['qbx-interior']:VineWoodHouse2(coords)
+        return exports['qbx_interior']:VineWoodHouse2(coords)
     elseif Config.Houses[house].tier == 88 then
-        return exports['qbx-interior']:VineWoodHouse3(coords)
+        return exports['qbx_interior']:VineWoodHouse3(coords)
     elseif Config.Houses[house].tier == 89 then
-        return exports['qbx-interior']:CreateK4GunWarehouse(coords)
+        return exports['qbx_interior']:CreateK4GunWarehouse(coords)
     elseif Config.Houses[house].tier == 90 then
-        return exports['qbx-interior']:CreateK4LuxuryHouse1(coords)
+        return exports['qbx_interior']:CreateK4LuxuryHouse1(coords)
     elseif Config.Houses[house].tier == 91 then
-        return exports['qbx-interior']:CreateK4LuxuryHouse2(coords)
+        return exports['qbx_interior']:CreateK4LuxuryHouse2(coords)
     elseif Config.Houses[house].tier == 92 then
-        return exports['qbx-interior']:CreateK4LuxuryHouse3(coords)
+        return exports['qbx_interior']:CreateK4LuxuryHouse3(coords)
     elseif Config.Houses[house].tier == 93 then
-        return exports['qbx-interior']:CreateK4LuxuryHouse4(coords)
+        return exports['qbx_interior']:CreateK4LuxuryHouse4(coords)
     elseif Config.Houses[house].tier == 94 then
-        return exports['qbx-interior']:CreateK4ManorHouse(coords)
+        return exports['qbx_interior']:CreateK4ManorHouse(coords)
     elseif Config.Houses[house].tier == 95 then
-        return exports['qbx-interior']:CreateK4Garage1(coords)
+        return exports['qbx_interior']:CreateK4Garage1(coords)
     elseif Config.Houses[house].tier == 96 then
-        return exports['qbx-interior']:CreateK4Garage2(coords)
+        return exports['qbx_interior']:CreateK4Garage2(coords)
     elseif Config.Houses[house].tier == 97 then
-        return exports['qbx-interior']:CreateK4Garage3(coords)
+        return exports['qbx_interior']:CreateK4Garage3(coords)
     elseif Config.Houses[house].tier == 98 then
-        return exports['qbx-interior']:CreateK4Garage4(coords)
+        return exports['qbx_interior']:CreateK4Garage4(coords)
     elseif Config.Houses[house].tier == 99 then
-        return exports['qbx-interior']:CreateK4Safehouse(coords)
+        return exports['qbx_interior']:CreateK4Safehouse(coords)
     elseif Config.Houses[house].tier == 100 then
-        return exports['qbx-interior']:CreateK4Warehouse(coords)
+        return exports['qbx_interior']:CreateK4Warehouse(coords)
     else
-        lib.notify({description = Lang:t("error.invalid_tier"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.invalid_tier"), 'error')
     end
 end
 
@@ -936,7 +936,7 @@ local function LeaveHouse(house)
         Wait(250)
         DoScreenFadeOut(250)
         Wait(500)
-        exports['qbx-interior']:DespawnInterior(houseObj, function()
+        exports['qbx_interior']:DespawnInterior(houseObj, function()
             UnloadDecorations()
             TriggerEvent('qb-weathersync:client:EnableSync')
             Wait(250)
@@ -1102,7 +1102,7 @@ RegisterNetEvent('qb-houses:client:addGarage', function()
         }
         TriggerServerEvent('qb-houses:server:addGarage', ClosestHouse, coords)
     else
-        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
     end
 end)
 
@@ -1113,16 +1113,16 @@ RegisterNetEvent('qb-houses:client:toggleDoorlock', function()
         if HasHouseKey then
             if Config.Houses[ClosestHouse].locked then
                 TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                lib.notify({description = Lang:t("success.unlocked"), type = 'success', duration = 2500})
+                exports.qbx_core:Notify(Lang:t("success.unlocked"), 'success', 2500)
             else
                 TriggerServerEvent('qb-houses:server:lockHouse', true, ClosestHouse)
-                lib.notify({description = Lang:t("error.locked"), type = 'error', duration = 3500})
+                exports.qbx_core:Notify(Lang:t("error.locked"), 'error', 3500)
             end
         else
-            lib.notify({description = Lang:t("error.no_keys"), type = 'error', duration = 3500})
+            exports.qbx_core:Notify(Lang:t("error.no_keys"), 'error', 3500)
         end
     else
-        lib.notify({description = Lang:t("error.no_door"), type = 'error', duration = 3500})
+        exports.qbx_core:Notify(Lang:t("error.no_door"), 'error', 3500)
     end
 end)
 
@@ -1130,7 +1130,7 @@ RegisterNetEvent('qb-houses:client:RingDoor', function(player, house)
     if ClosestHouse == house and IsInside then
         CurrentDoorBell = player
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "doorbell", 0.1)
-        lib.notify({description = Lang:t("info.door_ringing"), type = 'inform'})
+        exports.qbx_core:Notify(Lang:t("info.door_ringing"), 'inform')
     end
 end)
 
@@ -1143,15 +1143,14 @@ RegisterNetEvent('qb-houses:client:giveHouseKey', function()
         if housedist < 10 then
             TriggerServerEvent('qb-houses:server:giveHouseKey', playerId, ClosestHouse)
         else
-            lib.notify({description = Lang:t("error.no_door"), type = 'error'})
+            exports.qbx_core:Notify(Lang:t("error.no_door"), 'error')
         end
     elseif ClosestHouse == nil then
-        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
     else
-        lib.notify({description = Lang:t("error.no_one_near"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.no_one_near"), 'error')
     end
 end)
-
 RegisterNetEvent('qb-houses:client:removeHouseKey', function()
     if ClosestHouse ~= nil then
         local pedpos = GetEntityCoords(cache.ped)
@@ -1161,13 +1160,13 @@ RegisterNetEvent('qb-houses:client:removeHouseKey', function()
             if QBX.PlayerData.citizenid == result then
                 HouseKeysMenu()
             else
-                lib.notify({description = Lang:t("error.not_owner"), type = 'error'})
+                exports.qbx_core:Notify(Lang:t("error.not_owner"), 'error')
             end
         else
-            lib.notify({description = Lang:t("error.no_door"), type = 'error'})
+            exports.qbx_core:Notify(Lang:t("error.no_door"), 'error')
         end
     else
-        lib.notify({description = Lang:t("error.no_door"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.no_door"), 'error')
     end
 end)
 
@@ -1301,10 +1300,10 @@ RegisterNetEvent('qb-houses:client:setLocation', function(cData)
                 TriggerServerEvent('qb-houses:server:setLocation', coords, ClosestHouse, 3)
             end
         else
-            lib.notify({description = Lang:t("error.not_owner"), type = 'error'})
+            exports.qbx_core:Notify(Lang:t("error.not_owner"), 'error')
         end
     else
-        lib.notify({description = Lang:t("error.not_in_house"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.not_in_house"), 'error')
     end
 end)
 
@@ -1353,7 +1352,7 @@ RegisterNetEvent('qb-houses:client:HomeInvasion', function()
                         }, function()
                             if RamsDone + 1 >= Config.RamsNeeded then
                                 TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                                lib.notify({description = Lang:t("success.home_invasion"), type = 'success'})
+                                exports.qbx_core:Notify(Lang:t("success.home_invasion"), 'success')
                                 TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
                                 TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
                                 DoRamAnimation(false)
@@ -1369,24 +1368,24 @@ RegisterNetEvent('qb-houses:client:HomeInvasion', function()
                         end, function()
                             RamsDone = 0
                             TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                            lib.notify({description = Lang:t("error.failed_invasion"), type = 'error'})
+                            exports.qbx_core:Notify(Lang:t("error.failed_invasion"), 'error')
                             DoRamAnimation(false)
                         end)
                         TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
                     else
-                        lib.notify({description = Lang:t("error.inprogress_invasion"), type = 'error'})
+                        exports.qbx_core:Notify(Lang:t("error.inprogress_invasion"), 'error')
                     end
                 else
-                    lib.notify({description = Lang:t("error.already_open"), type = 'error'})
+                    exports.qbx_core:Notify(Lang:t("error.already_open"), 'error')
                 end
             else
-                lib.notify({description = Lang:t("error.no_house"), type = 'error'})
+                exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
             end
         else
-            lib.notify({description = Lang:t("error.no_police"), type = 'error'})
+            exports.qbx_core:Notify(Lang:t("error.no_police"), 'error')
         end
     else
-        lib.notify({description = Lang:t("error.no_house"), type = 'error'})
+        exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
     end
 end)
 
@@ -1415,9 +1414,9 @@ RegisterNetEvent('qb-houses:client:ResetHouse', function()
             TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
             TriggerServerEvent('qb-houses:server:lockHouse', true, ClosestHouse)
             RamsDone = 0
-            lib.notify({description = Lang:t("success.lock_invasion"), type = 'success'})
+            exports.qbx_core:Notify(Lang:t("success.lock_invasion"), 'success')
         else
-            lib.notify({description = Lang:t("error.no_invasion"), type = 'error'})
+            exports.qbx_core:Notify(Lang:t("error.no_invasion"), 'error')
         end
     end
 end)
@@ -1442,7 +1441,7 @@ end)
 
 RegisterNetEvent('qb-houses:client:AnswerDoorbell', function()
     if not CurrentDoorBell or CurrentDoorBell == 0 then
-        return lib.notify({description = Lang:t("error.nobody_at_door"), type = 'error'})
+        return exports.qbx_core:Notify(Lang:t("error.nobody_at_door"), 'error')
     end
     local door = vector3(Config.Houses[CurrentHouse].coords.enter.x + POIOffsets.exit.x,
         Config.Houses[CurrentHouse].coords.enter.y + POIOffsets.exit.y,
@@ -1469,7 +1468,7 @@ RegisterNetEvent('qb-houses:client:ChangeCharacter', function()
         while not IsScreenFadedOut() do
             Wait(10)
         end
-        exports['qbx-interior']:DespawnInterior(houseObj, function()
+        exports['qbx_interior']:DespawnInterior(houseObj, function()
             TriggerEvent('qb-weathersync:client:EnableSync')
             SetEntityCoords(cache.ped, Config.Houses[CurrentHouse].coords.enter.x,
                 Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5, false,
@@ -1563,7 +1562,7 @@ CreateThread(function()
                 wait = 0
                 if IsControlJustPressed(0, 38) then
                     TriggerEvent('qb-houses:client:OpenStash')
-                    exports['qbx-core']:HideText()
+                    exports['qbx_core']:HideText()
                 end
             end
 
@@ -1571,7 +1570,7 @@ CreateThread(function()
                 wait = 0
                 if IsControlJustPressed(0, 38) then
                     TriggerEvent('qb-houses:client:ChangeOutfit')
-                    exports['qbx-core']:HideText()
+                    exports['qbx_core']:HideText()
                 end
             end
 
@@ -1579,7 +1578,7 @@ CreateThread(function()
                 wait = 0
                 if IsControlJustPressed(0, 38) then
                     TriggerEvent('qb-houses:client:ChangeCharacter')
-                    exports['qbx-core']:HideText()
+                    exports['qbx_core']:HideText()
                 end
             end
         end
