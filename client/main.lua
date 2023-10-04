@@ -134,7 +134,7 @@ local function RegisterStashTarget()
 
     stashTargetBox:onPlayerInOut(function(isPointInside)
         if isPointInside and not entering and isOwned then
-            lib.showTextUI(Lang:t("target.open_stash"), {positon = 'left'})
+            lib.showTextUI(Lang:t("target.open_stash"), {position = 'left'})
         else
             lib.hideTextUI()
         end
