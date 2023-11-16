@@ -1,21 +1,21 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QBX-Houses'
+description 'QBX_Houses'
+repository 'https://github.com/Qbox-project/qbx_houses'
 version '1.0.0'
-
-ui_page 'html/index.html'
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'config.lua',
+    '@qbx_core/modules/utils.lua',
     '@qbx_core/shared/locale.lua',
-    '@qbx_core/import.lua',
     'locales/en.lua',
-    'locales/*.lua'
+    'locales/*.lua',
+    'config.lua',
 }
 
 client_scripts {
+    '@qbx_core/modules/playerdata.lua',
     'client/main.lua',
     'client/decorate.lua',
     '@PolyZone/client.lua',
@@ -28,11 +28,7 @@ server_scripts {
     'server/main.lua'
 }
 
-modules {
-    'qbx_core:core',
-    'qbx_core:playerdata',
-    'qbx_core:utils'
-}
+ui_page 'html/index.html'
 
 files {
     'html/index.html',
