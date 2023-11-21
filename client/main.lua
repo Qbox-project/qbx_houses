@@ -35,6 +35,7 @@ local charactersTargetBoxID = 'charactersTarget'
 local charactersTargetBox = nil
 local isInsiteCharactersTarget = false
 
+local playerState = LocalPlayer.state
 -- Functions
 
 local function showEntranceHeaderMenu()
@@ -402,7 +403,7 @@ local function FrontDoorCam(coords)
         80.00, false, 0)
     SetCamActive(cam, true)
     RenderScriptCams(true, true, 500, true, true)
-    TriggerEvent('qb-weathersync:client:EnableSync')
+    playerState.syncWeather = true
     FrontCam = true
     FreezeEntityPosition(cache.ped, true)
     Wait(500)
@@ -916,8 +917,7 @@ local function enterOwnedHouse(house)
     entering = true
     Wait(500)
     TriggerServerEvent('qb-houses:server:SetInsideMeta', house, true)
-    --TriggerEvent('qb-weathersync:client:DisableSync')
-    TriggerEvent('qb-weathersync:client:EnableSync')
+    playerState.syncWeather = true
     TriggerEvent('qb-weed:client:getHousePlants', house)
     entering = false
     setHouseLocations()
@@ -938,7 +938,7 @@ local function LeaveHouse(house)
         Wait(500)
         exports.qbx_interior:DespawnInterior(houseObj, function()
             UnloadDecorations()
-            TriggerEvent('qb-weathersync:client:EnableSync')
+            playerState.syncWeather = true
             Wait(250)
             DoScreenFadeIn(250)
             SetEntityCoords(cache.ped, Config.Houses[CurrentHouse].coords.enter.x,
@@ -980,8 +980,7 @@ local function enterNonOwnedHouse(house)
     entering = true
     Wait(500)
     TriggerServerEvent('qb-houses:server:SetInsideMeta', house, true)
-    --TriggerEvent('qb-weathersync:client:DisableSync')
-    TriggerEvent('qb-weathersync:client:EnableSync')
+    playerState.syncWeather = true
     TriggerEvent('qb-weed:client:getHousePlants', house)
     entering = false
     InOwnedHouse = true
@@ -1205,7 +1204,7 @@ end)
 RegisterNetEvent('qb-houses:client:setupHouseBlips', function() -- Setup owned on load
     CreateThread(function()
         Wait(2000)
-        if LocalPlayer.state['isLoggedIn'] then
+        if playerState.isLoggedIn then
             local ownedHouses = lib.callback.await('qb-houses:server:getOwnedHouses', false)
             if ownedHouses then
                 for k in pairs(ownedHouses) do
@@ -1469,7 +1468,7 @@ RegisterNetEvent('qb-houses:client:ChangeCharacter', function()
             Wait(10)
         end
         exports.qbx_interior:DespawnInterior(houseObj, function()
-            TriggerEvent('qb-weathersync:client:EnableSync')
+            playerState.syncWeather = true
             SetEntityCoords(cache.ped, Config.Houses[CurrentHouse].coords.enter.x,
                 Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5, false,
                 false, false, false)
@@ -1535,7 +1534,7 @@ end)
 
 CreateThread(function()
     local wait = 500
-    while not LocalPlayer.state.isLoggedIn do
+    while not playerState.isLoggedIn do
         -- do nothing
         Wait(wait)
     end
