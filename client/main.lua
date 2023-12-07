@@ -1329,64 +1329,65 @@ RegisterNetEvent('qb-houses:client:refreshLocations', function(house, location, 
     end
 end)
 
-RegisterNetEvent('qb-houses:client:HomeInvasion', function()
-    local ped = cache.ped
-    local pos = GetEntityCoords(ped)
-    local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-    if ClosestHouse then
-        local IsPresent = lib.callback.await('police:server:IsPoliceForcePresent', false)
-        if IsPresent then
-            local dist = #(pos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
-            if Config.Houses[ClosestHouse].IsRaming == nil then
-                Config.Houses[ClosestHouse].IsRaming = false
-            end
-            if dist < 1 then
-                if Config.Houses[ClosestHouse].locked then
-                    if not Config.Houses[ClosestHouse].IsRaming then
-                        DoRamAnimation(true)
-                        Skillbar.Start({
-                            duration = math.random(5000, 10000),
-                            pos = math.random(10, 30),
-                            width = math.random(10, 20),
-                        }, function()
-                            if RamsDone + 1 >= Config.RamsNeeded then
-                                TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
-                                exports.qbx_core:Notify(Lang:t("success.home_invasion"), 'success')
-                                TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
-                                TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                                DoRamAnimation(false)
-                            else
-                                DoRamAnimation(true)
-                                Skillbar.Repeat({
-                                    duration = math.random(500, 1000),
-                                    pos = math.random(10, 30),
-                                    width = math.random(5, 12),
-                                })
-                                RamsDone = RamsDone + 1
-                            end
-                        end, function()
-                            RamsDone = 0
-                            TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
-                            exports.qbx_core:Notify(Lang:t("error.failed_invasion"), 'error')
-                            DoRamAnimation(false)
-                        end)
-                        TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
-                    else
-                        exports.qbx_core:Notify(Lang:t("error.inprogress_invasion"), 'error')
-                    end
-                else
-                    exports.qbx_core:Notify(Lang:t("error.already_open"), 'error')
-                end
-            else
-                exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
-            end
-        else
-            exports.qbx_core:Notify(Lang:t("error.no_police"), 'error')
-        end
-    else
-        exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
-    end
-end)
+-- Has to be redone after properties refactor
+-- RegisterNetEvent('qb-houses:client:HomeInvasion', function()
+--     local ped = cache.ped
+--     local pos = GetEntityCoords(ped)
+--     local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
+--     if ClosestHouse then
+--         local IsPresent = lib.callback.await('police:server:IsPoliceForcePresent', false)
+--         if IsPresent then
+--             local dist = #(pos - vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z))
+--             if Config.Houses[ClosestHouse].IsRaming == nil then
+--                 Config.Houses[ClosestHouse].IsRaming = false
+--             end
+--             if dist < 1 then
+--                 if Config.Houses[ClosestHouse].locked then
+--                     if not Config.Houses[ClosestHouse].IsRaming then
+--                         DoRamAnimation(true)
+--                         Skillbar.Start({
+--                             duration = math.random(5000, 10000),
+--                             pos = math.random(10, 30),
+--                             width = math.random(10, 20),
+--                         }, function()
+--                             if RamsDone + 1 >= Config.RamsNeeded then
+--                                 TriggerServerEvent('qb-houses:server:lockHouse', false, ClosestHouse)
+--                                 exports.qbx_core:Notify(Lang:t("success.home_invasion"), 'success')
+--                                 TriggerServerEvent('qb-houses:server:SetHouseRammed', true, ClosestHouse)
+--                                 TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
+--                                 DoRamAnimation(false)
+--                             else
+--                                 DoRamAnimation(true)
+--                                 Skillbar.Repeat({
+--                                     duration = math.random(500, 1000),
+--                                     pos = math.random(10, 30),
+--                                     width = math.random(5, 12),
+--                                 })
+--                                 RamsDone = RamsDone + 1
+--                             end
+--                         end, function()
+--                             RamsDone = 0
+--                             TriggerServerEvent('qb-houses:server:SetRamState', false, ClosestHouse)
+--                             exports.qbx_core:Notify(Lang:t("error.failed_invasion"), 'error')
+--                             DoRamAnimation(false)
+--                         end)
+--                         TriggerServerEvent('qb-houses:server:SetRamState', true, ClosestHouse)
+--                     else
+--                         exports.qbx_core:Notify(Lang:t("error.inprogress_invasion"), 'error')
+--                     end
+--                 else
+--                     exports.qbx_core:Notify(Lang:t("error.already_open"), 'error')
+--                 end
+--             else
+--                 exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
+--             end
+--         else
+--             exports.qbx_core:Notify(Lang:t("error.no_police"), 'error')
+--         end
+--     else
+--         exports.qbx_core:Notify(Lang:t("error.no_house"), 'error')
+--     end
+-- end)
 
 RegisterNetEvent('qb-houses:client:SetRamState', function(bool, house)
     Config.Houses[house].IsRaming = bool
